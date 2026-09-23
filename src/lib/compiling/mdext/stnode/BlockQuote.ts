@@ -1,0 +1,113 @@
+/** 80**************************************************************************
+ * @module lib/compiling/mdext/stnode/BlockQuote
+ * @license MIT
+ ******************************************************************************/
+
+import type { lnum_t, uint } from "../../../alias.ts";
+import { isSpaceOrTab } from "../../../util/string.ts";
+import type { Loc } from "../../Loc.ts";
+import type { MdextTk } from "../../Token.ts";
+import type { SortedSn_id, SortedSnt_id } from "../../util.ts";
+import type { MdextLexr } from "../MdextLexr.ts";
+import { BlockCont } from "../alias.ts";
+import { _toHTML_, gathrUnrelTk_$ } from "../util.ts";
+import { Block } from "./Block.ts";
+import { CtnrBlock } from "./CtnrBlock.ts";
+import type { Inline } from "./Inline.ts";
+import { ListItem } from "./ListItem.ts";
+/*80--------------------------------------------------------------------------*/
+
+/** @final */
+export class BlockQuote extends CtnrBlock {
+  override continue(lexr_x: MdextLexr): BlockCont {
+    return lexr_x.continueBlockQuote_$(this);
+  }
+
+  override canContain(_x: Block): boolean {
+    return !(_x instanceof ListItem);
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  #mrkrTk_a;
+  addMrkr(tk_x: MdextTk) {
+    this.#mrkrTk_a.push(tk_x);
+  }
+
+  override get frstToken_1() {
+    return this.frstTk$ ??= this.#mrkrTk_a[0];
+  }
+  override get lastToken_1() {
+    if (this.lastTk$) return this.lastTk$;
+
+    const mrkrTk = this.#mrkrTk_a.at(-1)!;
+    const tk_ = this.children.at(-1)?.lastToken_1;
+    return this.lastTk$ = !tk_ || tk_.posSE(mrkrTk) ? mrkrTk : tk_;
+  }
+
+  constructor(mrkrTk_x: MdextTk) {
+    super();
+    this.#mrkrTk_a = [mrkrTk_x];
+  }
+
+  override reset_Block(): this {
+    super.reset_Block();
+    this.#mrkrTk_a.length = 0;
+    return this;
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  override gathrUnrelSnt(
+    drtStrtLoc_x: Loc,
+    drtStopLoc_x: Loc,
+    unrelSnt_ss_x: SortedSnt_id,
+    unrelSn_ss_x: SortedSn_id,
+  ): uint {
+    let ret = super.gathrUnrelSnt(
+      drtStrtLoc_x,
+      drtStopLoc_x,
+      unrelSnt_ss_x,
+      unrelSn_ss_x,
+    );
+
+    for (const tk of this.#mrkrTk_a) {
+      ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+    }
+    return ret;
+  }
+
+  override lidxOf(loc_x: Loc): lnum_t | -1 {
+    //jjjj TOCLEANUP
+    // const i_ = this.#mrkrTk_a.findIndex((tk) => loc_x.posE(tk.sntStrtLoc));
+    const i_ = this.#mrkrTk_a.findIndex((tk) =>
+      loc_x.line_$ === tk.sntFrstLine
+    );
+    return i_ >= 0 ? this.#mrkrTk_a[i_].sntFrstLidx_1 : -1;
+  }
+
+  override reuseLine(lidx_x: lnum_t, snt_a_x: (MdextTk | Inline)[]) {
+    snt_a_x.push(this.#mrkrTk_a[lidx_x - this.sntFrstLidx_1]);
+    super.reuseLine(lidx_x, snt_a_x);
+  }
+
+  /** @implement */
+  lcolCntStrt(loc_x: Loc): MdextTk | undefined {
+    let ret: MdextTk | undefined;
+    const ln_ = loc_x.line_$;
+    for (const tk of this.#mrkrTk_a) {
+      if (tk.sntFrstLine === ln_) {
+        loc_x.become_Loc(tk.sntStopLoc);
+        /* optional following space
+        */ if (isSpaceOrTab(loc_x.ucod)) loc_x.forwnCol(1);
+        ret = tk;
+        break;
+      }
+    }
+    return ret;
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  override _toHTML_(lexr_x: MdextLexr): string {
+    const s_ = _toHTML_(lexr_x, this.children);
+    return `<blockquote>\n${s_}${s_ ? "\n" : ""}</blockquote>`;
+  }
+}

@@ -1,0 +1,218 @@
+/** 80**************************************************************************
+ * @module lib/compiling/set/SetLexr
+ * @license MIT
+ ******************************************************************************/
+
+import { INOUT } from "@fe-src/preNs.ts";
+import * as v from "@valibot/valibot";
+import type { UInt16 } from "../../alias_v.ts";
+import { vULID } from "../../alias_v.ts";
+import { assert, out } from "../../util.ts";
+import { isWs, ws_a } from "../../util/string.ts";
+import { ULID_LEN } from "../../util/ulid.ts";
+import { ScanR } from "../alias.ts";
+import { Lexr } from "../Lexr.ts";
+import type { SetTk } from "../Token.ts";
+import { ErrMsg } from "../util.ts";
+import { SetTok } from "./SetTok.ts";
+/*80--------------------------------------------------------------------------*/
+
+const setWs_a_ = [...ws_a, /* "\n" */ 0xA] as UInt16[];
+
+/** Fuzykey `UInt16` which needs to escape using `\` */
+const esc_a_ = /* deno-fmt-ignore */ [
+  /* '"' */ 0x22, /* "#" */0x23, /* "(" */ 0x28, /* ")" */ 0x29, 
+  /* "\\" */ 0x5C, /* ">" */ 0x3E, /* "?" */ 0x3F,
+];
+
+//llll limit `VALVE` editing according to compiling
+/** @final */
+export class SetLexr extends Lexr<SetTok> {
+  /** Adjust `curLexTk$`, `stopLexTk$`, and assign `curLoc$` */
+  protected override preLex$(): void {
+    if (this.curLexTk$.value === SetTok.subtract) {
+      this.enlrgStrtTk$();
+    }
+    if (
+      this.stopLexTk$.value !== SetTok.stopBdry &&
+      !this.stopLexTk$.sntStrtLoc.atSob &&
+      this.stopLexTk$.sntStrtLoc.peek_ucod(-1) === /* "\\" */ 0x5C
+    ) {
+      this.enlrgStopTk$();
+    }
+    super.preLex$();
+  }
+  /*49|||||||||||||||||||||||||||||||||||||||||||*/
+
+  /** @const */
+  #strtSubtract(): boolean {
+    if (this.curLoc$.ucod !== /* "\\" */ 0x5C) return false;
+
+    using loc_u = this.curLoc$.usingDup().forw();
+    return this.reachLexBdry$(loc_u) || !esc_a_.includes(loc_u.ucod);
+  }
+
+  /** @const */
+  #strtULID(): boolean {
+    if (this.curLoc$.ucod !== /* "#" */ 0x23) return false;
+
+    using ran_u = this.outTk$!.ran_$.usingDup();
+    ran_u.strtLoc.become_Loc(this.curLoc$).forw();
+    ran_u.stopLoc.become_Loc(ran_u.strtLoc).forwn(ULID_LEN, "inline");
+    if (this.reachLexBdry$(ran_u.stopLoc, -1) || ran_u.stopLoc.overEol) {
+      return false;
+    }
+
+    return v.safeParse(vULID, ran_u.getText()).success;
+  }
+
+  @out((self: SetLexr) => {
+    assert(self.outTk$?.value === SetTok.quotkey);
+  })
+  #scanQuotkey(): void {
+    /*#static*/ if (INOUT) {
+      assert(
+        this.outTk$?.sntStrtLoc.posE(this.curLoc$) &&
+          this.curLoc$.ucod === /* '"' */ 0x22,
+      );
+    }
+    const VALVE = 10_000;
+    let valve = VALVE;
+    do {
+      const ucod = this.curLoc$.forw().ucod;
+      if (this.reachLexBdry$()) {
+        this.outTk$!.setErr({ msg: ErrMsg.quoted_string_open })
+          .setStop(this.curLoc$, SetTok.quotkey);
+        break;
+      }
+      if (
+        ucod === /* "\\" */ 0x5C &&
+        this.curLoc$.peek_ucod(1) === /* '"' */ 0x22
+      ) {
+        this.curLoc$.forw();
+        if (this.reachLexBdry$()) {
+          this.outTk$!.setErr({ msg: ErrMsg.quoted_string_open })
+            .setStop(this.curLoc$, SetTok.quotkey);
+          break;
+        }
+        continue;
+      }
+      if (ucod === /* '"' */ 0x22) {
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.quotkey);
+        break;
+      }
+    } while (--valve);
+    assert(valve, `Loop ${VALVE}(±1) times!`);
+  }
+
+  @out((self: SetLexr) => {
+    assert(self.outTk$?.value === SetTok.fuzykey && !self.outTk$.empty);
+  })
+  #scanFuzykey(): void {
+    /*#static*/ if (INOUT) {
+      assert(this.outTk$?.sntStrtLoc.posE(this.curLoc$));
+    }
+    const VALVE = 1_000;
+    let valve = VALVE;
+    L_0: do {
+      const ucod = this.curLoc$.ucod;
+      if (this.reachLexBdry$() || isWs(ucod, setWs_a_)) {
+        this.outTk$!.setStop(this.curLoc$, SetTok.fuzykey);
+        break;
+      }
+      switch (ucod) {
+        case /* '"' */ 0x22:
+        case /* "?" */ 0x3F:
+        case /* ">" */ 0x3E:
+        case /* "∩" */ 0x0_2229:
+        case /* "∪" */ 0x0_222A:
+        case /* "(" */ 0x28:
+        case /* ")" */ 0x29:
+          this.outTk$!.setStop(this.curLoc$, SetTok.fuzykey);
+          break L_0;
+        case /* "\\" */ 0x5C:
+          if (this.#strtSubtract()) {
+            this.outTk$!.setStop(this.curLoc$, SetTok.fuzykey);
+            break L_0;
+          }
+          this.curLoc$.forwn(2);
+          break;
+        case /* "#" */ 0x23:
+          if (this.#strtULID()) {
+            this.outTk$!.setStop(this.curLoc$, SetTok.fuzykey);
+            break L_0;
+          }
+          /* falls through */
+        default:
+          this.curLoc$.forw();
+          break;
+      }
+    } while (--valve);
+    assert(valve, `Loop ${VALVE}(±1) times!`);
+  }
+
+  /** @implement */
+  protected scan_impl$(): SetTk | undefined {
+    let ucod = this.curLoc$.ucod;
+    if (
+      isWs(this.curLoc$.ucod, setWs_a_) &&
+      this.skipWs$(setWs_a_) === ScanR.reachBdry
+    ) return;
+
+    this.outTk_1$;
+    ucod = this.curLoc$.ucod;
+    switch (ucod) {
+      case /* '"' */ 0x22:
+        this.#scanQuotkey();
+        break;
+      case /* "*" */ 0x2A:
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.asterisk);
+        break;
+      case /* "?" */ 0x3F:
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.question);
+        break;
+      case /* ">" */ 0x3E:
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.joiner);
+        break;
+      case /* "\\" */ 0x5C:
+        if (this.#strtSubtract()) {
+          this.outTk$!.setStop(this.curLoc$.forw(), SetTok.subtract);
+        } else {
+          this.#scanFuzykey();
+        }
+        break;
+      case /* "#" */ 0x23:
+        if (this.#strtULID()) {
+          this.outTk$!.setStop(this.curLoc$.forwn(ULID_LEN + 1), SetTok.priid);
+        } else {
+          this.#scanFuzykey();
+        }
+        break;
+      case /* "∩" */ 0x0_2229:
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.intersect);
+        break;
+      case /* "∪" */ 0x0_222A:
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.union);
+        break;
+      case /* "(" */ 0x28:
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.paren_open);
+        break;
+      case /* ")" */ 0x29:
+        this.outTk$!.setStop(this.curLoc$.forw(), SetTok.paren_cloz);
+        break;
+      default:
+        this.#scanFuzykey();
+        break;
+    }
+    return this.outTk$;
+  }
+  /*49|||||||||||||||||||||||||||||||||||||||||||*/
+
+  protected override canConcat$(tk_0_x: SetTk, tk_1_x: SetTk) {
+    return (
+      tk_0_x.value === SetTok.fuzykey && tk_1_x.value === SetTok.fuzykey &&
+      tk_0_x.sntStopLoc.posE(tk_1_x.sntStrtLoc)
+    );
+  }
+}
+/*80--------------------------------------------------------------------------*/

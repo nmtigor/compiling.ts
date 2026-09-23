@@ -1,0 +1,309 @@
+/** 80**************************************************************************
+ * @module lib/compiling/mdext/stnode/CodeBlock
+ * @license MIT
+ ******************************************************************************/
+
+import type { lcol_t, lnum_t, loff_t, uint } from "@fe-lib/alias.ts";
+import type { UInt16 } from "@fe-lib/alias_v.ts";
+import { assert } from "@fe-lib/util.ts";
+import { INOUT } from "@fe-src/preNs.ts";
+import type { Loc } from "../../Loc.ts";
+import type { MdextTk } from "../../Token.ts";
+import type { SortedSnt_id } from "../../util.ts";
+import type { FencedCBHead_LI, MdextLexr } from "../MdextLexr.ts";
+import type { BlockCont } from "../alias.ts";
+import {
+  _escapeXml_,
+  _tag_,
+  _unescapeString_,
+  gathrUnrelTk_$,
+  lastNonblankIn,
+} from "../util.ts";
+import { Block } from "./Block.ts";
+/*80--------------------------------------------------------------------------*/
+
+export abstract class CodeBlock extends Block {
+  override readonly acceptsLines = true;
+  /**
+   * @final
+   * @headconst @param _x can be an empty token
+   */
+  override appendLine(_x: [MdextTk]): void {
+    this.chunkTk_a$.push(_x[0]);
+
+    this.invalBdries();
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  /** chunk tokens, one line one token, may contain `empty` tokens */
+  protected readonly chunkTk_a$: MdextTk[] = [];
+
+  override reset_Block(): this {
+    super.reset_Block();
+    this.chunkTk_a$.length = 0;
+    return this;
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  override gathrUnrelSnt(
+    drtStrtLoc_x: Loc,
+    drtStopLoc_x: Loc,
+    unrelSnt_ss_x: SortedSnt_id,
+  ): uint {
+    let ret = 0;
+    for (const tk of this.chunkTk_a$) {
+      ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+    }
+    return ret;
+  }
+
+  override lidxOf(loc_x: Loc): lnum_t | -1 {
+    //jjjj TOCLEANUP
+    // const i_ = this.chunkTk_a$.findIndex((tk) => loc_x.posE(tk.sntStrtLoc));
+    const i_ = this.chunkTk_a$.findIndex((tk) =>
+      loc_x.line_$ === (tk.sntFrstLine)
+    );
+    return i_ >= 0 ? this.chunkTk_a$[i_].sntFrstLidx_1 : -1;
+  }
+
+  override reuseLine(lidx_x: lnum_t, snt_a_x: MdextTk[]) {
+    for (const tk of this.chunkTk_a$) {
+      const lidx = tk.sntFrstLidx_1;
+      if (lidx > lidx_x) break;
+      if (lidx === lidx_x) snt_a_x.push(tk);
+    }
+  }
+}
+/*80--------------------------------------------------------------------------*/
+
+/** @final */
+export class IndentedCodeBlock extends CodeBlock {
+  static readonly indent = 4;
+
+  override continue(lexr_x: MdextLexr): BlockCont {
+    return lexr_x.continueIndentedCodeBlock_$(this);
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  override get frstToken_1() {
+    return this.frstTk$ ??= this.chunkTk_a$[0];
+  }
+  override get lastToken_1() {
+    return this.lastTk$ ??= this.chunkTk_a$.at(-1)!;
+  }
+
+  constructor(chunkTk_x: MdextTk) {
+    super();
+    this.chunkTk_a$.push(chunkTk_x);
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  /**
+   * Blank lines preceding or following an indented code block are not included
+   * in it
+   */
+  protected override closeBlock_impl$(): void {
+    while (lastNonblankIn(this.chunkTk_a$.at(-1)!.sntFrstLine) < 0) {
+      this.chunkTk_a$.pop();
+    }
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  override _toHTML_(): string {
+    const s_a = ["<pre><code>"];
+    for (const tk of this.chunkTk_a$) {
+      s_a.push(_escapeXml_(tk.getText()), "\n");
+    }
+    s_a.push("</code></pre>");
+    return s_a.join("");
+  }
+}
+/*80--------------------------------------------------------------------------*/
+
+//jjjj TOCLEANUP
+// export const enum FencedCodeBlockSt {
+//   head = 1,
+//   head_chunk,
+//   chunk,
+//   tail,
+// }
+
+/** @final */
+export class FencedCodeBlock extends CodeBlock {
+  override continue(lexr_x: MdextLexr): BlockCont {
+    return lexr_x.continueFencedCodeBlock_$(this);
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  //jjjj TOCLEANUP
+  // #st;
+  // get st() {
+  //   return this.#st;
+  // }
+
+  /* #headTk */
+  readonly #headTk;
+
+  get headIndent(): lcol_t {
+    return (this.#headTk.lexdInfo as FencedCBHead_LI).indent;
+  }
+
+  get headUCod(): UInt16 {
+    return this.#headTk.sntStrtLoc.ucod;
+  }
+
+  get headSize(): loff_t {
+    return this.#headTk.length_1;
+  }
+  /* ~ */
+
+  /* #headChunkTk */
+  #headChunkTk: MdextTk | undefined;
+  setHeadChunk(_x: MdextTk) {
+    /*#static*/ if (INOUT) {
+      //jjjj TOCLEANUP
+      // assert(!this.#headChunkTk && this.#st === FencedCodeBlockSt.head);
+      assert(!this.#headChunkTk);
+    }
+    this.#headChunkTk = _x;
+    //jjjj TOCLEANUP
+    // this.#st = FencedCodeBlockSt.head_chunk;
+  }
+  /* ~ */
+
+  /* #tailTk */
+  #tailTk: MdextTk | undefined;
+  setTail(_x: MdextTk) {
+    /*#static*/ if (INOUT) {
+      //jjjj TOCLEANUP
+      // assert(!this.#tailTk && this.#st !== FencedCodeBlockSt.tail);
+      assert(!this.#tailTk);
+    }
+    this.#tailTk = _x;
+    //jjjj TOCLEANUP
+    // this.#st = FencedCodeBlockSt.tail;
+
+    this.invalBdries();
+  }
+  /* ~ */
+
+  override get frstToken_1() {
+    return this.frstTk$ ??= this.#headTk;
+  }
+  override get lastToken_1() {
+    if (this.lastTk$) return this.lastTk$;
+
+    return this.lastTk$ = this.#tailTk ??
+      this.chunkTk_a$.at(-1) ??
+      this.#headChunkTk ??
+      this.#headTk;
+  }
+
+  constructor(headTk_x: MdextTk) {
+    super();
+    this.#headTk = headTk_x;
+    //jjjj TOCLEANUP
+    // this.#st = FencedCodeBlockSt.head;
+  }
+
+  override reset_Block(): this {
+    super.reset_Block();
+    this.#headChunkTk = undefined;
+    this.#tailTk = undefined;
+    return this;
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  //jjjj TOCLEANUP
+  // protected override closeBlock_impl$(): void {}
+  /*49|||||||||||||||||||||||||||||||||||||||||||*/
+
+  override gathrUnrelSnt(
+    drtStrtLoc_x: Loc,
+    drtStopLoc_x: Loc,
+    unrelSnt_ss_x: SortedSnt_id,
+  ): uint {
+    let ret = gathrUnrelTk_$(
+      this.#headTk,
+      drtStrtLoc_x,
+      drtStopLoc_x,
+      unrelSnt_ss_x,
+    );
+
+    if (this.#headChunkTk) {
+      ret += gathrUnrelTk_$(
+        this.#headChunkTk,
+        drtStrtLoc_x,
+        drtStopLoc_x,
+        unrelSnt_ss_x,
+      );
+    }
+
+    ret += super.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+
+    if (this.#tailTk) {
+      ret += gathrUnrelTk_$(
+        this.#tailTk,
+        drtStrtLoc_x,
+        drtStopLoc_x,
+        unrelSnt_ss_x,
+      );
+    }
+    return ret;
+  }
+
+  override lidxOf(loc_x: Loc): lnum_t | -1 {
+    //jjjj TOCLEANUP
+    // if (
+    //   loc_x.posE(this.#headTk.sntStrtLoc) ||
+    //   this.#headChunkTk?.sntStrtLoc.posE(loc_x)
+    // ) return this.#headTk.sntFrstLidx_1;
+    if (loc_x.line_$ === this.#headTk.sntFrstLine) {
+      return this.#headTk.sntFrstLidx_1;
+    }
+
+    //jjjj TOCLEANUP
+    // if (this.#tailTk?.sntStrtLoc.posE(loc_x)) {
+    //   return this.#tailTk.sntFrstLidx_1;
+    // }
+    if (loc_x.line_$ === this.#tailTk?.sntFrstLine) {
+      return this.#tailTk.sntFrstLidx_1;
+    }
+
+    return super.lidxOf(loc_x);
+  }
+
+  override reuseLine(lidx_x: lnum_t, snt_a_x: MdextTk[]) {
+    if (this.sntFrstLidx_1 === lidx_x) {
+      snt_a_x.push(this.#headTk);
+      if (this.#headChunkTk) snt_a_x.push(this.#headChunkTk);
+    } else if (this.#tailTk && this.sntLastLidx_1 === lidx_x) {
+      snt_a_x.push(this.#tailTk);
+    } else {
+      super.reuseLine(lidx_x, snt_a_x);
+    }
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  override _toHTML_(): string {
+    const attrs: [k: string, v: string][] = [];
+
+    const info_s = _unescapeString_(this.#headChunkTk?.getText().trim() ?? "");
+    let lang_s = info_s.split(/\s+/).at(0);
+    if (lang_s?.length) {
+      lang_s = _escapeXml_(lang_s);
+      attrs.push([
+        "class",
+        `${/^language-/.test(lang_s) ? "" : "language-"}${lang_s}`,
+      ]);
+    }
+
+    const s_a = [`<pre>${_tag_("code", attrs)}`];
+    for (const tk of this.chunkTk_a$) {
+      s_a.push(_escapeXml_(tk.getText()), "\n");
+    }
+    s_a.push("</code></pre>");
+    return s_a.join("");
+  }
+}
+/*80--------------------------------------------------------------------------*/
