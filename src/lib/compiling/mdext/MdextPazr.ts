@@ -80,12 +80,12 @@ export class MdextPazr extends Pazr<MdextTok> {
     // const drtStopLoc = this.tailBdryClrTk_$!.sntStrtLoc;
     const drtStopLoc = this.lexr$.stopLexTk_$.sntStrtLoc;
     for (let i = this.unrelSn_ss_$.length; i--;) {
-      if (drtStopLoc.posE(this.unrelSn_ss_$[i].sntStrtLoc)) {
+      if (drtStopLoc.posE(this.unrelSn_ss_$.ary[i].sntStrtLoc)) {
         /* Reusability of Stnode is checked by `sntStrtLoc`. In case of this
         branch, current Stnode can not be reused (see 3144). Deleting it from
         `unrelSn_ss_$` makes its Token be able to be gathered by
         `#gathrUnrelSntIn()`. */
-        this.unrelSn_ss_$.rmvByIndex(i);
+        this.unrelSn_ss_$.splice(i, 1);
       }
     }
   }

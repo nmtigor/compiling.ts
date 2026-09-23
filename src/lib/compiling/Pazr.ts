@@ -290,7 +290,7 @@ export abstract class Pazr<T extends Tok = BaseTok> {
       if (Stnode.sn_ss.length === 0) {
         Stnode.sn_ss.add(snClrTk_0?.sn_$ ?? snClrTk_1!.sn_$!);
       }
-      Stnode.sn_ss.add_O(this.errSn_ss$);
+      Stnode.sn_ss.add_O(this.errSn_ss$.ary);
       tip = Stnode.calcCommon({
         strtTk: snClrTk_0 ?? this.lexr$.frstLexTk,
         stopTk: snClrTk_1 ?? this.lexr$.lastLexTk,
@@ -551,7 +551,7 @@ export abstract class Pazr<T extends Tok = BaseTok> {
         if (snClrTk_0) Stnode.sn_ss.add(snClrTk_0.sn_$!);
         if (snClrTk_1) Stnode.sn_ss.add(snClrTk_1.sn_$!);
       }
-      Stnode.sn_ss.add_O(this.errSn_ss$);
+      Stnode.sn_ss.add_O(this.errSn_ss$.ary);
       this.drtSn_$ = this.setPazRegion$(
         Stnode.calcCommon(
           { unrelSn_ss: this.unrelSn_ss_$, unrelSn_a, strtTk, stopTk },
@@ -594,7 +594,7 @@ export abstract class Pazr<T extends Tok = BaseTok> {
     const unrelSn_a: Stnode<T>[] = [];
     sn_x.filterChildrenTo(unrelSn_a, this.drtSn_$);
     this.unrelSn_ss_$.add_O(unrelSn_a);
-    this.unrelSn_ss_$.add_O(this.reusdSn_ss_$);
+    this.unrelSn_ss_$.add_O(this.reusdSn_ss_$.ary);
     this.reusdSn_ss_$.reset_SortedSet();
 
     //jjjj TOCLEANUP

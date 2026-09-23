@@ -646,8 +646,8 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
   @out((self: typeof Stnode<any>, _1, args) => {
     const sn_ss = args[1] ?? self.sn_ss;
     assert(
-      sn_ss.length === 1 && sn_ss[0] &&
-        (!sn_ss[0].isErr || sn_ss[0].isRoot),
+      sn_ss.length === 1 && sn_ss.ary[0] &&
+        (!sn_ss.ary[0].isErr || sn_ss.ary[0].isRoot),
     );
   })
   static calcCommon(
@@ -682,18 +682,24 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
       retSn_y = retSn_y.getSafeSn(unrelSn_a);
 
       if (unrelSn_ss) {
-        /* 3305 */
-        const tormvSn_a: Stnode<any>[] = [];
-        for (const sn of unrelSn_ss.add_O(unrelSn_a)) {
-          if (sn.isAncestorOf(retSn_y)) tormvSn_a.push(sn);
+        //jjjj TOCLEANUP
+        // /* 3305 */
+        // const tormvSn_a: Stnode<any>[] = [];
+        // for (const sn of unrelSn_ss.add_O(unrelSn_a)) {
+        //   if (sn.isAncestorOf(retSn_y)) tormvSn_a.push(sn);
+        // }
+        // unrelSn_ss.rmv_O(tormvSn_a);
+        for (let i = unrelSn_ss.add_O(unrelSn_a).length; i--;) {
+          if (unrelSn_ss.at(i)!.isAncestorOf(retSn_y)) {
+            unrelSn_ss.splice(i, 1);
+          }
         }
-        unrelSn_ss.rmv_O(tormvSn_a);
       }
       return retSn_y;
     };
 
     if (sn_ss_x.length === 1) {
-      return sn_ss_x[0] = correct_(sn_ss_x[0]);
+      return sn_ss_x.ary[0] = correct_(sn_ss_x.ary[0]);
     }
 
     sn_ss_x.forEach((sn) => sn.depth_1);
@@ -702,7 +708,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
 
     const todelSn_ss = unrelSn_ss ? new SortedSn_id() : undefined;
     if (todelSn_ss) {
-      for (let sn of todelSn_ss.add_O(sn_ss_x)) {
+      for (let sn of todelSn_ss.add_O(sn_ss_x.ary)) {
         while (sn.#parent) {
           sn = sn.#parent;
           if (todelSn_ss.add(sn) < 0) break;
@@ -713,9 +719,9 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
     let swapSn;
     const swap = (i_y: uint, j_y: uint): void => {
       if (i_y !== j_y) {
-        swapSn = sn_ss_x[i_y];
-        sn_ss_x[i_y] = sn_ss_x[j_y];
-        sn_ss_x[j_y] = swapSn;
+        swapSn = sn_ss_x.ary[i_y];
+        sn_ss_x.ary[i_y] = sn_ss_x.ary[j_y];
+        sn_ss_x.ary[j_y] = swapSn;
       }
     };
 
@@ -724,7 +730,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
      * @param n_y >=1
      */
     const floatUp = (i_y: uint, n_y: uint = 1): void => {
-      let sn_i = sn_ss_x[i_y];
+      let sn_i = sn_ss_x.ary[i_y];
       let de_ = sn_i.depth;
       while (n_y--) {
         unrelSn_ss?.add_O(sn_i.siblings);
@@ -737,7 +743,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
         //     }
         //   }
         // }
-        sn_i = sn_ss_x[i_y] = sn_i.#parent!;
+        sn_i = sn_ss_x.ary[i_y] = sn_i.#parent!;
         sn_i.depth_$ = --de_;
       }
     };
@@ -751,7 +757,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
     const floatupTail = (iUp_y: uint, tgtDe_y: Depth_): void => {
       let j_0 = iUp_y;
       for (; j_0--;) {
-        if (sn_ss_x[j_0].depth !== tgtDe_y) {
+        if (sn_ss_x.ary[j_0].depth !== tgtDe_y) {
           break;
         }
       }
@@ -769,7 +775,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
       /* Remove duplicates */
       L_0: while (j_0 < len - 1) {
         for (let j = j_0; j < len - 1; ++j) {
-          if (sn_ss_x[j] === sn_ss_x[len - 1]) {
+          if (sn_ss_x.ary[j] === sn_ss_x.ary[len - 1]) {
             sn_ss_x.length = --len;
             continue L_0;
           }
@@ -783,7 +789,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
     L_0: while (sn_ss_x.length > 1 && --valve) {
       const de_0 = sn_ss_x.at(-1)!.depth;
       for (let i = sn_ss_x.length - 1; i--;) {
-        const de_i = sn_ss_x[i].depth;
+        const de_i = sn_ss_x.ary[i].depth;
         if (
           de_i !== de_0 ||
           i === 0 && !floatupTailCalled
@@ -810,9 +816,9 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
 
       for (let i = 0; i < len; i++) {
         floatUp(i);
-        const sn_i = sn_ss_x[i];
+        const sn_i = sn_ss_x.ary[i];
         for (let j = i + 1; j < len;) {
-          if (sn_i === sn_ss_x[j].parent) {
+          if (sn_i === sn_ss_x.ary[j].parent) {
             swap(j, len - 1);
             sn_ss_x.length = --len;
           } else j++;
@@ -824,9 +830,9 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
 
     floatupAll();
 
-    unrelSn_ss?.rmv_O(todelSn_ss);
+    unrelSn_ss?.rmv_O(todelSn_ss?.ary);
 
-    return sn_ss_x[0] = correct_(sn_ss_x[0]);
+    return sn_ss_x.ary[0] = correct_(sn_ss_x.ary[0]);
   }
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
 

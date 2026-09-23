@@ -449,8 +449,8 @@ export class MdextLexr extends Lexr<MdextTok> {
     );
     if (!newSn.isErr) pazr.unrelSn_ss_$.add(newSn);
 
-    this.unrelSnt_ss_$.add_O(this.reusdSnt_ss_$);
-    this.unrelSnt_ss_$.add_O(this.abadnSnt_ss_$);
+    this.unrelSnt_ss_$.add_O(this.reusdSnt_ss_$.ary);
+    this.unrelSnt_ss_$.add_O(this.abadnSnt_ss_$.ary);
     this.reusdSnt_ss_$.reset_SortedSet();
     this.abadnSnt_ss_$.reset_SortedSet();
     /* `_reusdSnt_2_ss_` is used only in `lexInline_$()` which is after possible
@@ -3591,9 +3591,6 @@ export class SortedMdextSnt_id extends SortedSnt_id {
     return ret;
   }
 
-  override rmvByIndex() {
-    return fail("Disabled");
-  }
   override rmv(val_x: Snt): uint | -1 {
     const ret = super.rmv(val_x);
     if (val_x instanceof Linkdef) this.#n_Linkdef -= 1;

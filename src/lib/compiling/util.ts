@@ -223,7 +223,8 @@ export class SortedSn_depth extends SortedSn_id {
   }
   override sort() {
     this.setLess(SortedSn_depth.#less);
-    return super.resort();
+    super.resort();
+    return this.ary;
   }
 }
 /*80--------------------------------------------------------------------------*/

@@ -15,7 +15,6 @@ import { SortedErr } from "../util.ts";
 import type { ErrRepr, TokenRepr } from "./alias.ts";
 import type { HTMLLexr } from "./HTMLLexr.ts";
 import { HTMLTok } from "./HTMLTok.ts";
-import type { CtnrEl } from "./stnode/CtnrEl.ts";
 import type { Comment_LI, Doctype_LI, Proins_LI } from "./util.ts";
 import {
   _reprErr_,
@@ -61,7 +60,7 @@ export class HTMLTk extends Token<HTMLTok> {
 
   /** including `Err`s in `lexdInfo` */
   _getAllErrs_(): SortedErr {
-    const retSa = new SortedErr(this.err_ss$).messUp();
+    const retSa = new SortedErr(this.err_ss$?.ary).messUp();
     if (
       this.value === HTMLTok.tag ||
       this.value === HTMLTok.bogus && this.lexdInfo instanceof Tag_LI

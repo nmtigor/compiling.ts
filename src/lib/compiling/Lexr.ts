@@ -176,8 +176,8 @@ export abstract class Lexr<T extends Tok = BaseTok> {
    */
   onlyErrMsg(msg_x: ErrMsg, tk_x?: Token<T>): boolean {
     return this.errTk_ss$.length === 1 &&
-      this.errTk_ss$[0].onlyErrMsg(msg_x) &&
-      (!tk_x || this.errTk_ss$[0] === tk_x);
+      this.errTk_ss$.ary[0].onlyErrMsg(msg_x) &&
+      (!tk_x || this.errTk_ss$.ary[0] === tk_x);
   }
 
   /** @final */
@@ -756,7 +756,7 @@ export abstract class Lexr<T extends Tok = BaseTok> {
     if (this.isErr) {
       /*#static*/ if (INOUT) {
         assert(
-          this.curLexTk$.posSe(this.errTk_ss$[0]) &&
+          this.curLexTk$.posSe(this.errTk_ss$.ary[0]) &&
             this.stopLexTk$.posGe(this.errTk_ss$.at(-1)!),
         );
       }

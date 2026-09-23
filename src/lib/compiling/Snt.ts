@@ -5,7 +5,6 @@
 
 import type { ERan, ERanr } from "@fe-edt/ERan.ts";
 import { g_eran_fac } from "@fe-edt/ERan.ts";
-import * as Is from "@fe-lib/util/is.ts";
 import type { lnum_t, loff_t } from "../alias.ts";
 import type { Id_t } from "../alias_v.ts";
 import type { Line } from "./Line.ts";
@@ -91,7 +90,7 @@ export abstract class Snt {
   tfrErr(tgtTk_x: Snt): this {
     /* in (non-reverse) order */
     for (let i = 0, iI = this.err_ss$?.length ?? 0; i < iI; i++) {
-      tgtTk_x.setErr(this.err_ss$![i]);
+      tgtTk_x.setErr(this.err_ss$!.ary[i]);
     }
     return this;
   }

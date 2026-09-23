@@ -112,7 +112,7 @@ export class PaleCoor extends Runr<unknown, PaleCoor> {
     return this.axes[this.#iAx];
   }
   getColran(): Colran | undefined {
-    const q_ = this.qm_ss[this.#iQM][0];
+    const q_ = this.qm_ss.ary[this.#iQM][0];
     return q_?.axis(this.#iAx);
   }
   /* ~ */
@@ -173,7 +173,7 @@ export class PaleCoor extends Runr<unknown, PaleCoor> {
 
   /** Not related to `#iAx` */
   getMapped(iQM_x = this.#iQM_1): Cssc | ColrFn {
-    return this.qm_ss[iQM_x][1];
+    return this.qm_ss.ary[iQM_x][1];
   }
   setMapped(_x: Cssc | ColrFn) {
     if (isColrFn(_x) && this.dim !== 1) {
@@ -186,7 +186,7 @@ export class PaleCoor extends Runr<unknown, PaleCoor> {
       return;
     }
 
-    this.qm_ss[this.#iQM][1] = _x;
+    this.qm_ss.ary[this.#iQM][1] = _x;
     // if (this.#iQM === this.#iQM) {
     //   this.mapped_c.setByCssc(_x);
     //   this.refresh();
@@ -238,13 +238,13 @@ export class PaleCoor extends Runr<unknown, PaleCoor> {
     if (this.dim === 0) {
       contain_0 = true;
       this.#iQM_1 = 0;
-      const qm_ = this.qm_ss[0];
+      const qm_ = this.qm_ss.ary[0];
       if (isColrFn(qm_[1])) this.#validateQM(qm_);
       this.mapped_c.setByCssc(qm_[1] as Cssc);
     } else if (this.dim === 1) {
       this.#colr.setByCssc(Pale.get(this.axes[0]).cssc);
       for (let i = 0, iI = this.nQM; i < iI; ++i) {
-        const qm = this.qm_ss[i];
+        const qm = this.qm_ss.ary[i];
         if (qm[0] === undefined || qm[0].axis(0).contain(this.#colr)) {
           contain_0 = true;
           this.#iQM_1 = i;
@@ -259,7 +259,7 @@ export class PaleCoor extends Runr<unknown, PaleCoor> {
       }
     } else {
       for (let i = 0, iI = this.nQM; i < iI; ++i) {
-        const qm_ = this.qm_ss[i];
+        const qm_ = this.qm_ss.ary[i];
         if (qm_[0] === undefined) {
           contain_0 = true;
           this.#iQM_1 = i;
@@ -296,7 +296,7 @@ export class PaleCoor extends Runr<unknown, PaleCoor> {
       assert(0 <= iQM_x && iQM_x < this.nQM);
     }
     let resample_ = false;
-    const qm_ = this.qm_ss[iQM_x];
+    const qm_ = this.qm_ss.ary[iQM_x];
     if (qm_[0]) {
       // ! qm_[0]` should not be shared, so no need to dismantle handlers
       qm_[0] = undefined;
@@ -350,7 +350,7 @@ export class PaleCoor extends Runr<unknown, PaleCoor> {
     // const q_ = this.qm_ss.get(iQM_x)[0];
     // q_?.off(q_, this.#upR);
     // q_?.modified_mo.off(true, this.#onQModified);
-    this.qm_ss.rmvByIndex(iQM_x);
+    this.qm_ss.splice(iQM_x, 1);
 
     if (iQM_x < this.#iQM) {
       this.#iQM -= 1;

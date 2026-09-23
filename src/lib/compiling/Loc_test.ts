@@ -38,7 +38,7 @@ afterEach(() => {
   bufr.reset_Bufr();
 });
 
-describe("Move TokLoc, nowrap, rtl", () => {
+describe("Move Loc, nowrap, rtl", () => {
   beforeEach(() => {
     init_("abc אמנון\n\n0123 xyz", "rtl");
   });
@@ -173,7 +173,7 @@ describe("Move TokLoc, nowrap, rtl", () => {
   });
 });
 
-describe("Move TokLoc, with wrap, ltr", () => {
+describe("Move Loc, with wrap, ltr", () => {
   beforeEach(() => {
     init_("abc אמנון\n0123 xyz", "ltr", { [0]: [7, 9], [1]: [7, 8] });
   });
@@ -280,7 +280,7 @@ describe("Move TokLoc, with wrap, ltr", () => {
   });
 });
 
-describe("Move TokLoc, with wrap, rtl", () => {
+describe("Move Loc, with wrap, rtl", () => {
   beforeEach(() => {
     init_("abc אמנון\n0123 xyz", "rtl", { [0]: [7, 9], [1]: [7, 8] });
   });

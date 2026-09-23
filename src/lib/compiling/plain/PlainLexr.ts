@@ -102,9 +102,6 @@ export class SortedPlainTk_id extends SortedSnt_id<PlainTk> {
   //   return super.add(val_x);
   // }
 
-  override rmvByIndex() {
-    return fail("Disabled");
-  }
   // override delete(val_x: PlainTk): uint | -1 {
   //   return super.delete(val_x);
   // }

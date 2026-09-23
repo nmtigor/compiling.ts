@@ -142,6 +142,8 @@ Reflect.defineProperty(Object.prototype, "eql", {
     valve_ = valve_x;
     return eql_impl_(this, rhs_x);
   },
+  /* In "SortedSet.ts", it's reassigned by `Array.prototype.eql`. */
+  writable: true,
 });
 
 // Reflect.defineProperty( Object.prototype, "_toString_eq", {
