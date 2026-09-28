@@ -8,7 +8,7 @@ import { TagNS } from "@fe-cpl/html/alias.ts";
 import type { SortedSn_id } from "@fe-cpl/util.ts";
 import { ErrMsg } from "@fe-cpl/util.ts";
 import type { uint } from "@fe-lib/alias.ts";
-import { merge } from "@fe-lib/jslang.ts";
+import { composite } from "@fe-lib/jslang.ts";
 import { Loc } from "../../Loc.ts";
 import { HTMLTk } from "../HTMLTk.ts";
 import { HTMLTok } from "../HTMLTok.ts";
@@ -88,10 +88,10 @@ export abstract class CtnrEl extends Elment {
 }
 
 export interface CtnrEl extends Elment, HTMLCtnr {}
-merge({
-  srcClass: HTMLCtnr,
+composite({
   tgtClass: CtnrEl,
   tgtField: "ctnr_$",
+  srcClass: HTMLCtnr,
   ignrdKey: HTMLCtnr.impledMethod_a,
 });
 /*64----------------------------------------------------------*/

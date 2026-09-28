@@ -4,7 +4,7 @@
  ******************************************************************************/
 
 import type { uint } from "@fe-lib/alias.ts";
-import { merge } from "@fe-lib/jslang.ts";
+import { composite } from "@fe-lib/jslang.ts";
 import { assert } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
 import type { Loc } from "../../Loc.ts";
@@ -96,10 +96,10 @@ export class Doment extends HTMLSn {
 }
 
 export interface Doment extends HTMLSn, HTMLCtnr {}
-merge({
-  srcClass: HTMLCtnr,
+composite({
   tgtClass: Doment,
   tgtField: "ctnr_$",
+  srcClass: HTMLCtnr,
   ignrdKey: HTMLCtnr.impledMethod_a,
 });
 /*80--------------------------------------------------------------------------*/

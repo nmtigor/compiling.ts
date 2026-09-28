@@ -5,7 +5,7 @@
 
 import { INOUT } from "../../preNs.ts";
 import type { id_t, uint } from "../alias.ts";
-import { merge } from "@fe-lib/jslang.ts";
+import { composite } from "@fe-lib/jslang.ts";
 import { assert, fail } from "../util.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -371,10 +371,10 @@ export class SortedSet<T> {
 }
 
 export interface SortedSet<T> extends Omit<Array<T>, number> {}
-merge({
-  srcClass: Array,
+composite({
   tgtClass: SortedSet,
   tgtField: "ary",
+  srcClass: Array,
   ignrdKey: ["includes", "indexOf", "sort"],
 });
 /*64----------------------------------------------------------*/

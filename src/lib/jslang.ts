@@ -981,19 +981,20 @@ export const mix = <C extends Constructor | AbstractConstructor>(
 };
 
 type MergeP_<S, T> = {
-  srcClass: Constructor<S> | AbstractConstructor<S>;
   tgtClass: Constructor<T> | AbstractConstructor<T>;
   tgtField: keyof T;
+  srcClass: Constructor<S> | AbstractConstructor<S>;
   ignrdKey?: (string | symbol)[];
 };
 /**
- * @const @param srcClass
+ **! Should always companion with an interface declaration
  * @headconst @param tgtClass
  * @const @param tgtField
+ * @const @param srcClass
  * @const @param ignrdKey
  */
-export const merge = <S, T>(
-  { srcClass, tgtClass, tgtField, ignrdKey }: MergeP_<S, T>,
+export const composite = <S, T>(
+  { tgtClass, tgtField, srcClass, ignrdKey }: MergeP_<S, T>,
 ) => {
   for (const key of Reflect.ownKeys(srcClass.prototype)) {
     if (key === "constructor" || ignrdKey?.includes(key)) continue;
