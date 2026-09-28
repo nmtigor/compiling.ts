@@ -7,11 +7,11 @@ import type { lnum_t, uint } from "@fe-lib/alias.ts";
 import { assert } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
 import { Loc } from "../../Loc.ts";
-import { type MdextTk } from "../../Token.ts";
-import { SortedSnt_id } from "../../util.ts";
-import { type MdextLexr, RawHTML_LI } from "../MdextLexr.ts";
+import type { MdextTk } from "../../Token.ts";
+import type { MdextLexr } from "../MdextLexr.ts";
+import { RawHTML_LI } from "../MdextLexr.ts";
 import type { BlockCont } from "../alias.ts";
-import { gathrUnrelTk_$ } from "../util.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
 import { Block } from "./Block.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -114,11 +114,11 @@ export class HTMLBlock extends Block {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
     let ret = 0;
     for (const tk of this.#chunkTk_a) {
-      ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+      ret += tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
     return ret;
   }

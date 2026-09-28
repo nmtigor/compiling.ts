@@ -36,11 +36,12 @@ export class MdextPazr extends Pazr<MdextTok> {
     super(Lexr_x);
   }
 
-  override reset_Pazr(): this {
-    this.reset_Pazr$();
-    this.root$ = undefined;
-    return this;
-  }
+  //jjjj TOCLEANUP
+  // override reset_Pazr(): this {
+  //   this.reset_Pazr$();
+  //   this.root$ = undefined;
+  //   return this;
+  // }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   @out((self: MdextPazr) => {

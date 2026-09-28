@@ -3,8 +3,8 @@
  * @license MIT
  ******************************************************************************/
 
-import { DEBUG } from "@fe-src/preNs.ts";
-import { fail } from "../../util.ts";
+import { DEBUG, INOUT } from "@fe-src/preNs.ts";
+import { assert, fail } from "../../util.ts";
 import { isASCIIWs } from "../../util/string.ts";
 import { BaseTok } from "../BaseTok.ts";
 import { Ran } from "../Ran.ts";
@@ -15,6 +15,7 @@ import { SortedErr } from "../util.ts";
 import type { ErrRepr, TokenRepr } from "./alias.ts";
 import type { HTMLLexr } from "./HTMLLexr.ts";
 import { HTMLTok } from "./HTMLTok.ts";
+import type { CtnrEl } from "./stnode/CtnrEl.ts";
 import type { Comment_LI, Doctype_LI, Proins_LI } from "./util.ts";
 import {
   _reprErr_,
@@ -187,6 +188,25 @@ export class HTMLTk extends Token<HTMLTok> {
     return this.lexdInfo instanceof NamEntity_LI
       ? this.lexdInfo.chr
       : String.fromCodePoint((this.lexdInfo as NumEntity_LI).num);
+  }
+  /*49|||||||||||||||||||||||||||||||||||||||||||*/
+
+  /** @headconst @param tgtEl_x */
+  tfrAttrsTo_$(tgtEl_x: CtnrEl): void {
+    /*#static*/ if (INOUT) {
+      assert(this.isOpntag);
+    }
+    const srcAttrs = (this.lexdInfo as Tag_LI).attrs;
+    const tgtAttrs = tgtEl_x.attrs_$;
+    for (let i = 0, iI = srcAttrs.an_a.length; i < iI; i++) {
+      if (!tgtAttrs.hasAn(srcAttrs.an_a[i])) {
+        tgtAttrs.addAttr(srcAttrs.ran_a[i]);
+      }
+    }
+    tgtAttrs.crTk_a.push(...srcAttrs.crTk_a);
+
+    srcAttrs.ran_a.length = 0; // to prevent `Ran.rev()` twice
+    srcAttrs.crTk_a.length = 0; // ditto
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 

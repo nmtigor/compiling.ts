@@ -4,9 +4,12 @@
  ******************************************************************************/
 
 import { uint } from "@fe-lib/alias.ts";
+import type { Loc } from "../../Loc.ts";
 import { Stnode } from "../../Stnode.ts";
+import type { SortedSn_id } from "../../util.ts";
 import type { HTMLTok } from "../HTMLTok.ts";
-import { ErrRepr, TagNS } from "../alias.ts";
+import { ErrRepr, Insmod } from "../alias.ts";
+import type { SortedHTMLSnt_id } from "../util.ts";
 import { _reprErr_ } from "../util.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -21,10 +24,31 @@ export abstract class HTMLSn extends Stnode<HTMLTok> {
     return retA;
   }
 
-  constructor() {
+  readonly insmod;
+
+  /** @const @param insmod */
+  constructor(insmod_x: Insmod) {
     super();
+    this.insmod = insmod_x;
+
     this.NErr$ = 64;
   }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  /**
+   * @primaryconst
+   * @borrow @primaryconst @param _drtStrtLoc_x
+   * @borrow @primaryconst @param _drtStopLoc_x
+   * @out @param _unrelSnt_ss_x
+   * @borrow @primaryconst @param _unrelSn_ss_x
+   * @return count of what're gathered
+   */
+  abstract gathrUnrelSnt(
+    _drtStrtLoc_x: Loc,
+    _drtStopLoc_x: Loc,
+    _unrelSnt_ss_x: SortedHTMLSnt_id,
+    _unrelSn_ss_x: SortedSn_id,
+  ): uint;
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   /** @const @param _indent_x */

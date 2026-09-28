@@ -3,6 +3,7 @@
  * @license MIT
  ******************************************************************************/
 
+import type { Insmod } from "../alias.ts";
 import { ContCat, NestCat } from "../alias.ts";
 import type { HTMLTk } from "../HTMLTk.ts";
 import { avIsBodyok } from "../util.ts";
@@ -11,11 +12,12 @@ import { VoidEl } from "./VoidEl.ts";
 
 export abstract class SpecialVoidEl extends VoidEl {
   /**
+   * @const @param insmod_x
    * @const @param tagname_x
    * @const @param opntagTk_x
    */
-  constructor(tagname_x: string, opntagTk_x: HTMLTk) {
-    super(tagname_x, opntagTk_x);
+  constructor(insmod_x: Insmod, tagname_x: string, opntagTk_x: HTMLTk) {
+    super(insmod_x, tagname_x, opntagTk_x);
     this.nestCat$ = NestCat.special;
   }
 }
@@ -23,62 +25,83 @@ export abstract class SpecialVoidEl extends VoidEl {
 
 /** @final */
 export class Area_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("area", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "area", opntagTk_x);
     this.contCat$ = ContCat.phrasing;
   }
 }
 
 /** @final */
 export class Base_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("base", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "base", opntagTk_x);
     this.contCat$ = ContCat.metadata;
   }
 }
 
 /** @final */
 export class Br_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("br", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "br", opntagTk_x);
     this.contCat$ = ContCat.phrasing;
   }
 }
 
 /** @final */
 export class Col_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("col", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "col", opntagTk_x);
   }
 }
 
 /** @final */
 export class Embed_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("embed", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "embed", opntagTk_x);
     this.contCat$ = ContCat.embedded | ContCat.interactive | ContCat.palpable;
   }
 }
 
 /** @final */
 export class Hr_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("hr", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "hr", opntagTk_x);
     this.contCat$ = ContCat.flow;
   }
 }
 
 /** @final */
 export class Img_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("img", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "img", opntagTk_x);
     this.contCat$ = ContCat.embedded | ContCat.palpable |
       ContCat.form_associated;
     if (this.attrs_$.hasAn("usemap") || this.attrs_$.hasAn("controls")) {
@@ -89,9 +112,12 @@ export class Img_El extends SpecialVoidEl {
 
 /** @final */
 export class Input_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("input", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "input", opntagTk_x);
     this.contCat$ = ContCat.phrasing | ContCat.form_associated;
     if (this.attrs_$.getAv("type") !== "hidden") {
       this.contCat$ |= ContCat.interactive | ContCat.palpable |
@@ -102,9 +128,12 @@ export class Input_El extends SpecialVoidEl {
 
 /** @final */
 export class Link_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("link", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "link", opntagTk_x);
     this.contCat$ = ContCat.metadata;
     if (
       this.attrs_$.hasAn("itemprop") || avIsBodyok(this.attrs_$.getAv("rel"))
@@ -116,9 +145,12 @@ export class Link_El extends SpecialVoidEl {
 
 /** @final */
 export class Meta_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("meta", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "meta", opntagTk_x);
     this.contCat$ = ContCat.metadata;
     if (this.attrs_$.hasAn("itemprop")) {
       this.contCat$ |= ContCat.phrasing;
@@ -128,25 +160,34 @@ export class Meta_El extends SpecialVoidEl {
 
 /** @final */
 export class Source_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("source", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "source", opntagTk_x);
   }
 }
 
 /** @final */
 export class Track_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("track", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "track", opntagTk_x);
   }
 }
 
 /** @final */
 export class Wbr_El extends SpecialVoidEl {
-  /** @const @param opntagTk_x */
-  constructor(opntagTk_x: HTMLTk) {
-    super("wbr", opntagTk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param opntagTk_x
+   */
+  constructor(insmod_x: Insmod, opntagTk_x: HTMLTk) {
+    super(insmod_x, "wbr", opntagTk_x);
     this.contCat$ = ContCat.phrasing;
   }
 }

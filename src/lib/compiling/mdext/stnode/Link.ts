@@ -9,15 +9,14 @@ import { DEBUG, INOUT } from "@fe-src/preNs.ts";
 import type { Loc } from "../../Loc.ts";
 import type { MdextTk } from "../../Token.ts";
 import { Token } from "../../Token.ts";
-import { SortedSnt_id } from "../../util.ts";
 import type { BrktOpen_LI, MdextLexr } from "../MdextLexr.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
 import {
   _escapeXml_,
   _isSafeURL_,
   _tag_,
   _toHTML_,
   _unescapeString_,
-  gathrUnrelTk_$,
 } from "../util.ts";
 import { Inline } from "./Inline.ts";
 /*80--------------------------------------------------------------------------*/
@@ -145,44 +144,39 @@ export class Link extends Inline {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
     let ret = super.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     if (ret) return ret;
 
     for (const snt of this.#textPart) {
       if (snt instanceof Token) {
-        ret += gathrUnrelTk_$(snt, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+        ret += snt.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
       } else {
         ret += snt.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
       }
     }
 
     if (this.#lastTk !== this.#textPart.at(-1)) {
-      ret += gathrUnrelTk_$(
-        this.#lastTk,
-        drtStrtLoc_x,
-        drtStopLoc_x,
-        unrelSnt_ss_x,
-      );
+      ret += this.#lastTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
 
     if (this.#lablTk_a) {
       for (const tk of this.#lablTk_a) {
         if (tk !== this.#lastTk) {
-          ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+          ret += tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
         }
       }
     }
 
     if (this.#destPart) {
       for (const tk of this.#destPart) {
-        ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+        ret += tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
       }
     }
     if (this.#titlTk_a) {
       for (const tk of this.#titlTk_a) {
-        ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+        ret += tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
       }
     }
     return ret;

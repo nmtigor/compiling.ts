@@ -5,7 +5,7 @@
 
 import { INOUT } from "../../preNs.ts";
 import type { id_t, uint } from "../alias.ts";
-import "../jslang.ts";
+import { merge } from "@fe-lib/jslang.ts";
 import { assert, fail } from "../util.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -198,7 +198,7 @@ export class SortedSet<T> {
   //   if( ret < 0 )
   //   {
   //     if( this.#index === this.length ) ret = this.#index - 1;
-  //     else if( this.#less( val_x, this.ary$[this.#index] ) )
+  //     else if( this.#less( val_x, this.ary[this.#index] ) )
   //          ret = this.#index - 1;
   //     else ret = this.#index;
   //   }
@@ -215,7 +215,7 @@ export class SortedSet<T> {
   add(val_x: T): uint | -1 {
     const had = this.includes(val_x);
     if (!had) {
-      this.ary.splice(this.#index, 0, val_x);
+      this.splice(this.#index, 0, val_x);
     }
     return had ? -1 : this.#index;
   }
@@ -239,7 +239,7 @@ export class SortedSet<T> {
   rmv(val_x: T): uint | -1 {
     const has = this.includes(val_x);
     if (has) {
-      this.ary.splice(this.#index, 1);
+      this.splice(this.#index, 1);
     }
     return has ? this.#index : -1;
   }
@@ -359,7 +359,7 @@ export class SortedSet<T> {
 
   // toString() {
   //   const str_a: string[] = [];
-  //   for (const val of this.ary$) {
+  //   for (const val of this.ary) {
   //     str_a.push(String(val));
   //   }
   //   return `[ ${str_a.join(", ")} ]`;
@@ -371,25 +371,12 @@ export class SortedSet<T> {
 }
 
 export interface SortedSet<T> extends Omit<Array<T>, number> {}
-
-const arrayKey_a_: (string | symbol)[] = [
-  ...Object.getOwnPropertyNames(Array.prototype),
-  ...Object.getOwnPropertySymbols(Array.prototype),
-];
-const impledMethod_a_: (string | symbol)[] = ["includes", "indexOf"];
-for (const key of arrayKey_a_) {
-  if (key === "constructor" || impledMethod_a_.includes(key)) continue;
-
-  const arrayMethod = (Array.prototype as any)[key];
-  if (typeof arrayMethod !== "function") continue;
-
-  (SortedSet.prototype as any)[key] = function (
-    this: SortedSet<unknown>,
-    ...args: unknown[]
-  ) {
-    return arrayMethod.call(this.ary, ...args);
-  };
-}
+merge({
+  srcClass: Array,
+  tgtClass: SortedSet,
+  tgtField: "ary",
+  ignrdKey: ["includes", "indexOf", "sort"],
+});
 /*64----------------------------------------------------------*/
 
 export class SortedIdo<T extends { id: id_t } = { id: id_t }>

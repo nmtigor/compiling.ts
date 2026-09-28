@@ -162,7 +162,7 @@ for (
 
 // describe.skip("kkkk", () => {
 describe("Compiling Paragraph", () => {
-  it("edits in one Paragraph without line feed", () => {
+  it("Edit in one Paragraph without line feed", () => {
     init_(["p", "", "abc", "123", "xyz", "", "n"]);
     let tkId_a: Id_t[], tkId_a_1: Id_t[];
 
@@ -251,7 +251,7 @@ describe("Compiling Paragraph", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one Paragraph without line feed", () => {
+  it("Edit at boundaries of one Paragraph without line feed", () => {
     init_(["p", "", "abc", "123", "xyz", "", "n"]);
     let tkId_a: Id_t[], tkId_a_1: Id_t[];
 
@@ -434,7 +434,7 @@ describe("Compiling Paragraph", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("feeds lines", () => {
+  it("Feed lines", () => {
     init_(["p", "n"]);
 
     repl(rv(0, 0), "\n");
@@ -600,7 +600,7 @@ describe("Compiling Paragraph", () => {
 
 describe("Compiling BlockQuote", () => {
   describe("Paragraph in BlockQuote", () => {
-    it("edits in one Paragraph without line feed", () => {
+    it("Edit in one Paragraph without line feed", () => {
       init_(["> p", ">", "> abc", "> 123", "> xyz", ">", "> n"]);
       let tkId_a: Id_t[], tkId_a_1: Id_t[];
 
@@ -732,7 +732,7 @@ describe("Compiling BlockQuote", () => {
       assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
     });
 
-    it("edits at boundaries of one Paragraph without line feed", () => {
+    it("Edit at boundaries of one Paragraph without line feed", () => {
       init_(["> p", ">", "> abc", "> 123", "> xyz", ">", "> n"]);
       let tkId_a: Id_t[], tkId_a_1: Id_t[];
 
@@ -996,7 +996,7 @@ describe("Compiling BlockQuote", () => {
       assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
     });
 
-    it("feeds lines", () => {
+    it("Feed lines", () => {
       init_(["> p", "> n"]);
       let tkId_a: Id_t[], tkId_a_1: Id_t[];
 
@@ -1252,7 +1252,7 @@ describe("Compiling BlockQuote", () => {
 });
 
 describe("Compiling IndentedCodeBlock", () => {
-  it("edits in one IndentedCodeBlock without line feed", () => {
+  it("Edit in one IndentedCodeBlock without line feed", () => {
     init_(["p", "", "    abc", "    123", "    xyz", "n"]);
 
     repl(ran(3).rv, "4");
@@ -1339,7 +1339,7 @@ describe("Compiling IndentedCodeBlock", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one IndentedCodeBlock without line feed", () => {
+  it("Edit at boundaries of one IndentedCodeBlock without line feed", () => {
     init_(["p", "", "    abc", "    123", "    xyz", "n"]);
 
     repl(ran(4).rv, "4");
@@ -1521,7 +1521,7 @@ describe("Compiling IndentedCodeBlock", () => {
 });
 
 describe("Compiling FencedCodeBlock", () => {
-  it("edits in one FencedCodeBlock without line feed", () => {
+  it("Edit in one FencedCodeBlock without line feed", () => {
     init_(["p", "```", "```", "n"]);
 
     repl(ran(1).rv, "\n");
@@ -1644,7 +1644,7 @@ describe("Compiling FencedCodeBlock", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one FencedCodeBlock without line feed", () => {
+  it("Edit at boundaries of one FencedCodeBlock without line feed", () => {
     init_(["p", "```", "```", "n"]);
 
     repl(rv(1, 0), "`");
@@ -1870,12 +1870,12 @@ describe("Compiling FencedCodeBlock", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("feeds lines", () => {});
+  it("Feed lines", () => {});
 });
 
 describe("Compiling ListItem", () => {
   describe("Paragraph in ListItem", () => {
-    it("edits in one Paragraph without line feed", () => {
+    it("Edit in one Paragraph without line feed", () => {
       init_(["  * p", "", "    abc", " 123", "    xyz", "", "    n"]);
       let tkId_a: Id_t[], tkId_a_1: Id_t[];
       let list_: List;
@@ -1937,7 +1937,7 @@ describe("Compiling ListItem", () => {
     });
   });
 
-  it("edits in one ListItem without line feed", () => {
+  it("Edit in one ListItem without line feed", () => {
     init_([" * p", "  * abc", " 123", "    xyz", "* n"]);
     let tkId_a: Id_t[], tkId_a_1: Id_t[];
     let list_: List;
@@ -1990,7 +1990,7 @@ describe("Compiling ListItem", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one ListItem without line feed", () => {
+  it("Edit at boundaries of one ListItem without line feed", () => {
     init_([" * p", "  * abc", " 123", "    xyz", "* n"]);
     let tkId_a: Id_t[], tkId_a_1: Id_t[];
     let list_: List;
@@ -2166,7 +2166,7 @@ describe("Compiling ListItem", () => {
 });
 
 describe("Compiling ThematicBreak", () => {
-  it("edits ThematicBreak", () => {
+  it("Edit ThematicBreak", () => {
     init_(["p", "  ***", "n"]);
 
     repl(ran(1).rv, " ");
@@ -2328,7 +2328,7 @@ describe("Compiling ThematicBreak", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("feeds lines", () => {
+  it("Feed lines", () => {
     init_(["p", "  ***", "n"]);
 
     repl(ran(1).rv, "\n");
@@ -2375,7 +2375,7 @@ describe("Compiling ThematicBreak", () => {
 });
 
 describe("Compiling SetextHeading", () => {
-  it("edits in one SetextHeading without line feed", () => {
+  it("Edit in one SetextHeading without line feed", () => {
     init_(["p", "", "abc", "123", "xyz", "---", "n"]);
 
     repl(ran(3).rv, "4");
@@ -2513,7 +2513,7 @@ describe("Compiling SetextHeading", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one SetextHeading without line feed", () => {
+  it("Edit at boundaries of one SetextHeading without line feed", () => {
     init_(["p", "", "abc", "---", "n"]);
 
     repl(ran(3).rv, "-");
@@ -2604,7 +2604,7 @@ describe("Compiling SetextHeading", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("feeds lines", () => {
+  it("Feed lines", () => {
     init_(["p", "", "abc", "---", "n"]);
 
     repl(rv(1, 0), "\n");
@@ -2790,7 +2790,7 @@ describe("Compiling SetextHeading", () => {
 });
 
 describe("Compiling ATXHeading", () => {
-  it("edits in one ATXHeading without line feed", () => {
+  it("Edit in one ATXHeading without line feed", () => {
     init_(["p", "# abc #", "n"]);
 
     repl(rv(1, 5), "4");
@@ -2896,7 +2896,7 @@ describe("Compiling ATXHeading", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one ATXHeading without line feed", () => {
+  it("Edit at boundaries of one ATXHeading without line feed", () => {
     init_(["p", "# abc #", "n"]);
 
     repl(ran(1).rv, "#");
@@ -3024,7 +3024,7 @@ describe("Compiling ATXHeading", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("feeds lines", () => {
+  it("Feed lines", () => {
     init_(["p", "# abc #", "n"]);
 
     repl(rv(1, 0), "\n");
@@ -3148,7 +3148,7 @@ describe("Compiling ATXHeading", () => {
 });
 
 describe("Compiling HTMLBlock", () => {
-  it("edits in one HTMLBlock without line feed", () => {
+  it("Edit in one HTMLBlock without line feed", () => {
     init_(["p", "<pre>", "</pre>", "n"]);
 
     repl(ran(1).rv, "\n");
@@ -3226,7 +3226,7 @@ describe("Compiling HTMLBlock", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one HTMLBlock without line feed", () => {
+  it("Edit at boundaries of one HTMLBlock without line feed", () => {
     init_(["p", "<pre>", "</pre>", "n"]);
 
     repl(ran(2).rv, "-->");
@@ -3316,7 +3316,7 @@ describe("Compiling HTMLBlock", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("feeds lines", () => {
+  it("Feed lines", () => {
     init_(["p", "<pre>", "</pre>", "n"]);
 
     repl(rv(1, 0), "\n");
@@ -3407,7 +3407,7 @@ describe("Compiling HTMLBlock", () => {
 });
 
 describe("Compiling Linkdef", () => {
-  it("edits destination, title in one Linkdef", () => {
+  it("Edit destination, title in one Linkdef", () => {
     init_(["[bar]:abc", "[foo]: /uri (xyz)", "[foo] [bar]"]);
 
     /*
@@ -3463,7 +3463,7 @@ describe("Compiling Linkdef", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits label in one Linkdef", () => {
+  it("Edit label in one Linkdef", () => {
     init_(["[foo]: /uri (xyz)", "[foo]"]);
 
     repl(rv(0, 3), "\n");
@@ -3546,7 +3546,7 @@ describe("Compiling Linkdef", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one Linkdef", () => {
+  it("Edit at boundaries of one Linkdef", () => {
     init_(["[bar]:abc", "[foo]: /uri (xyz)", "[foo]"]);
 
     repl(ran(1).rv, " ");
@@ -3722,7 +3722,7 @@ describe("Compiling Linkdef", () => {
 });
 
 describe("Compiling Link", () => {
-  it("edits destination, title in one Link", () => {
+  it("Edit destination, title in one Link", () => {
     init_(["abc[foo](/uri (xyz))"]);
 
     repl(rv(0, 13, 0, 14), "");
@@ -3791,7 +3791,7 @@ describe("Compiling Link", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits label in one Link", () => {
+  it("Edit label in one Link", () => {
     init_(["[foo]: /uri (xyz)", "abc[foo][foo]"]);
 
     repl(rv(1, 9), " ");
@@ -3914,7 +3914,7 @@ describe("Compiling Link", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one Link", () => {
+  it("Edit at boundaries of one Link", () => {
     init_(["abc[foo](/uri (xyz))", "123"]);
 
     repl(ran(0).rv, " ");
@@ -4073,7 +4073,7 @@ describe("Compiling Autolink", () => {
   //   console.log(pazr._root_?._toHTML_(lexr));
   // });
 
-  it("edits in one Autolink", () => {
+  it("Edit in one Autolink", () => {
     init_("[abc<http://uri]>xyz");
     assertEquals(lexr.curLexTk_$._Repr_(), [
       /* deno-fmt-ignore */ [
@@ -4182,7 +4182,7 @@ describe("Compiling Autolink", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one Autolink", () => {
+  it("Edit at boundaries of one Autolink", () => {
     init_("[abc<http://uri>xyz");
 
     repl(rv(0, 16), " ");
@@ -4324,7 +4324,7 @@ describe("Compiling Autolink", () => {
 });
 
 describe("Compiling CodeInline", () => {
-  it("edits in one CodeInline", () => {
+  it("Edit in one CodeInline", () => {
     init_("[not a `link(/foo`)");
 
     repl(rv(0, 12), "]");
@@ -4394,7 +4394,7 @@ describe("Compiling CodeInline", () => {
     assertEquals(lexr._abadnSnt_2_sa_._reprSorted_(), []);
   });
 
-  it("edits at boundaries of one CodeInline", () => {
+  it("Edit at boundaries of one CodeInline", () => {
     init_("[not a `link](/foo`)");
 
     repl(rv(0, 19), " ");
@@ -4579,12 +4579,12 @@ describe("Compiling CodeInline", () => {
 });
 
 describe("Compiling HTMLInline", () => {
-  it("edits in one HTMLInline", () => {
+  it("Edit in one HTMLInline", () => {
     init_(["<a  /><b2", 'data="foo" >']);
     ///
   });
 
-  it("edits at boundaries of one CodeInline", () => {
+  it("Edit at boundaries of one CodeInline", () => {
     ///
     // info("blah **blah** blah", () => {
     //   assertEquals(1 + 1, 3);

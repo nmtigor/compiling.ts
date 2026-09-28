@@ -6,8 +6,9 @@
 import type { lnum_t, uint } from "@fe-lib/alias.ts";
 import type { Loc } from "../../Loc.ts";
 import type { MdextTk } from "../../Token.ts";
-import type { SortedSn_id, SortedSnt_id } from "../../util.ts";
+import type { SortedSn_id } from "../../util.ts";
 import type { MdextLexr } from "../MdextLexr.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
 import { Block } from "./Block.ts";
 import type { Inline } from "./Inline.ts";
 /*80--------------------------------------------------------------------------*/
@@ -40,6 +41,7 @@ export abstract class CtnrBlock extends Block {
     return this.children.at(this.#iCurChild);
   }
 
+  /** @const @param child_x */
   compil(child_x: Block | null): void {
     if (child_x) {
       /* `#iCurChild` won't change to other non-negatives after setting to a
@@ -56,6 +58,7 @@ export abstract class CtnrBlock extends Block {
     return this.#iCurChild >= 0;
   }
 
+  /** @const @param child_x */
   isCompiling(child_x: Block): boolean {
     return this.inCompiling && this.curChild === child_x;
   }
@@ -146,19 +149,19 @@ export abstract class CtnrBlock extends Block {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
     unrelSn_ss_x: SortedSn_id,
   ): uint {
     let ret = 0;
     for (const c of this.children) {
-      if (!unrelSn_ss_x.includes(c)) {
-        ret += c.gathrUnrelSnt(
-          drtStrtLoc_x,
-          drtStopLoc_x,
-          unrelSnt_ss_x,
-          unrelSn_ss_x,
-        );
-      }
+      if (unrelSn_ss_x.includes(c)) continue;
+
+      ret += c.gathrUnrelSnt(
+        drtStrtLoc_x,
+        drtStopLoc_x,
+        unrelSnt_ss_x,
+        unrelSn_ss_x,
+      );
     }
     return ret;
   }

@@ -8,8 +8,7 @@ import { assert, fail } from "@fe-lib/util.ts";
 import { DEBUG, INOUT } from "@fe-src/preNs.ts";
 import type { Loc } from "../../Loc.ts";
 import type { MdextTk } from "../../Token.ts";
-import type { SortedSnt_id } from "../../util.ts";
-import { gathrUnrelTk_$ } from "../util.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
 import { Inline } from "./Inline.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -80,28 +79,18 @@ export class HTMLInline extends Inline {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
     let ret = super.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     if (ret) return ret;
 
-    ret += gathrUnrelTk_$(
-      this.#frstTk,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-    );
+    ret += this.#frstTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
 
     for (const tk of this.#chunkTk_a) {
-      ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+      ret += tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
 
-    ret += gathrUnrelTk_$(
-      this.#lastTk,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-    );
+    ret += this.#lastTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     return ret;
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/

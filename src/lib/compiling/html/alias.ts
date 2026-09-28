@@ -48,6 +48,22 @@ export type ErrRepr = {
 };
 /*80--------------------------------------------------------------------------*/
 
+/* deno-fmt-ignore */
+/** "insertion mode" */
+export const enum Insmod {
+  initial,
+  before_html,
+  before_head, in_head, in_head_noscript, after_head,
+  in_body, after_body, after_after_body,
+  text,
+  in_table, in_table_text, in_table_body,
+  in_caption, 
+  in_column_group, 
+  in_row,
+  in_cell,
+  in_template,
+}
+
 /** [13.1.2 Elements](https://html.spec.whatwg.org/multipage/syntax.html#elements-2) */
 export enum TextCat {
   normal,

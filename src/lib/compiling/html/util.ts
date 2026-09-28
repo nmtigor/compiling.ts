@@ -10,7 +10,7 @@ import * as Is from "../../util/is.ts";
 import { isASCIIWs } from "../../util/string.ts";
 import type { Ran } from "../Ran.ts";
 import type { Err } from "../util.ts";
-import { LexdInfo } from "../util.ts";
+import { LexdInfo, SortedSnt_id } from "../util.ts";
 import type { ErrRepr, ForeignAttrName } from "./alias.ts";
 import { AttrNS, State, TagNS } from "./alias.ts";
 import { HTMLTk } from "./HTMLTk.ts";
@@ -674,4 +674,7 @@ export const _sortErrs_ = (ers_x: ErrRepr[]): ErrRepr[] =>
 
     return 0;
   });
+/*80--------------------------------------------------------------------------*/
+
+export class SortedHTMLSnt_id extends SortedSnt_id<HTMLSn | HTMLTk> {}
 /*80--------------------------------------------------------------------------*/

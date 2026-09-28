@@ -7,10 +7,11 @@ import type { lnum_t, uint } from "../../../alias.ts";
 import { isSpaceOrTab } from "../../../util/string.ts";
 import type { Loc } from "../../Loc.ts";
 import type { MdextTk } from "../../Token.ts";
-import type { SortedSn_id, SortedSnt_id } from "../../util.ts";
+import type { SortedSn_id } from "../../util.ts";
 import type { MdextLexr } from "../MdextLexr.ts";
 import { BlockCont } from "../alias.ts";
-import { _toHTML_, gathrUnrelTk_$ } from "../util.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
+import { _toHTML_ } from "../util.ts";
 import { Block } from "./Block.ts";
 import { CtnrBlock } from "./CtnrBlock.ts";
 import type { Inline } from "./Inline.ts";
@@ -59,7 +60,7 @@ export class BlockQuote extends CtnrBlock {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
     unrelSn_ss_x: SortedSn_id,
   ): uint {
     let ret = super.gathrUnrelSnt(
@@ -70,7 +71,7 @@ export class BlockQuote extends CtnrBlock {
     );
 
     for (const tk of this.#mrkrTk_a) {
-      ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+      ret += tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
     return ret;
   }

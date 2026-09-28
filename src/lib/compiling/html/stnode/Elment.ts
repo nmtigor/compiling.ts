@@ -6,23 +6,25 @@
 import type { uint } from "@fe-lib/alias.ts";
 import { assert } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
+import type { Insmod } from "../alias.ts";
 import { ContCat, NestCat, TagNS, TextCat } from "../alias.ts";
 import type { HTMLTk } from "../HTMLTk.ts";
 import type { Tag_LI } from "../util.ts";
 import { AttrRans } from "../util.ts";
-import type { HTMLCtnr } from "./alias.ts";
 import { CtnrEl } from "./CtnrEl.ts";
+import type { Doment } from "./Doment.ts";
+import type { HTMLCtnr } from "./HTMLCtnr.ts";
 import { HTMLSn } from "./HTMLSn.ts";
 import { _toHTML_ } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
 
 export abstract class Elment extends HTMLSn {
-  override get parent(): HTMLCtnr | undefined {
-    return super.parent as HTMLCtnr | undefined;
+  override get parent() {
+    return super.parent as CtnrEl | Doment | undefined;
   }
 
   get idx(): uint | -1 {
-    return this.parent?.snt_a_$.indexOf(this) ?? -1;
+    return this.parent?.snt_a.indexOf(this) ?? -1;
   }
 
   /**
@@ -82,11 +84,16 @@ export abstract class Elment extends HTMLSn {
   // srcPa?: CtnrEl | undefined;
 
   /**
+   * @const @param insmod_x
    * @const @param tagname_x
    * @const @param opntagTk_x `HTMLTok.tag`
    */
-  protected constructor(tagname_x: string, opntagTk_x?: HTMLTk) {
-    super();
+  protected constructor(
+    insmod_x: Insmod,
+    tagname_x: string,
+    opntagTk_x?: HTMLTk,
+  ) {
+    super(insmod_x);
     this.tagname = tagname_x;
     this.ns = tagname_x.startsWith("svg ")
       ? TagNS.SVG

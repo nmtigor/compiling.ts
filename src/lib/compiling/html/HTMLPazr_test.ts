@@ -80,9 +80,9 @@ describe("Tree-construction", () => {
     it(t_x.data.join("\\n"), () => {
       // console.log(t_x);
       init_(t_x.data.join("\n"));
-      assertEquals(reprSnErrs_(lexr._pazr_._err_), t_x.sn_errors);
+      assertEquals(reprSnErrs_(lexr.pazr_$._err_), t_x.sn_errors);
       assertEquals(reprTkErrs_(lexr._err_), t_x.tk_errors ?? []);
-      assertEquals(lexr._pazr_._root_?._toHTML_(), t_x.document);
+      assertEquals(lexr.pazr_$._root_?._toHTML_(), t_x.document);
     });
   };
 

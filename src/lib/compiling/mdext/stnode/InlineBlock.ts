@@ -11,10 +11,10 @@ import { Loc } from "../../Loc.ts";
 import { g_ran_fac } from "../../RanFac.ts";
 import type { MdextTk } from "../../Token.ts";
 import { Token } from "../../Token.ts";
-import type { LexdInfo, SortedSnt_id } from "../../util.ts";
+import type { LexdInfo } from "../../util.ts";
 import type { BrktOpen_LI, EmphDelim_LI, MdextLexr } from "../MdextLexr.ts";
 import { MdextTok } from "../MdextTok.ts";
-import { gathrUnrelTk_$ } from "../util.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
 import { Autolink } from "./Autolink.ts";
 import { Block } from "./Block.ts";
 import { IndentedCodeBlock } from "./CodeBlock.ts";
@@ -894,12 +894,12 @@ export abstract class InlineBlock extends Block {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
     let ret = 0;
     for (const snt of this.snt_a_$) {
       if (snt instanceof Token) {
-        ret += gathrUnrelTk_$(snt, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+        ret += snt.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
       } else {
         ret += snt.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
       }

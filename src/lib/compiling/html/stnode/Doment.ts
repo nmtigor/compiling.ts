@@ -3,43 +3,43 @@
  * @license MIT
  ******************************************************************************/
 
-import type { int } from "@fe-lib/alias.ts";
+import type { uint } from "@fe-lib/alias.ts";
+import { merge } from "@fe-lib/jslang.ts";
 import { assert } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
+import type { Loc } from "../../Loc.ts";
 import { Ranval } from "../../Ranval.ts";
+import type { SortedSn_id } from "../../util.ts";
 import { ErrMsg } from "../../util.ts";
-import type { HTMLTk } from "../HTMLTk.ts";
-import type { Doctype_LI } from "../util.ts";
-import type { HTMLCtnr } from "./alias.ts";
-import {
-  _toHTML_,
-  apdSnt,
-  children,
-  frstToken_1,
-  insSnt,
-  lastToken_1,
-  rmvSnt,
-  tfrSntTo,
-} from "./util.ts";
+import { Insmod } from "../alias.ts";
+import { HTMLTk } from "../HTMLTk.ts";
+import type { Doctype_LI, SortedHTMLSnt_id } from "../util.ts";
 import { Elment } from "./Elment.ts";
+import { HTMLCtnr } from "./HTMLCtnr.ts";
 import { HTMLSn } from "./HTMLSn.ts";
 import type { Proins } from "./Proins.ts";
+import { _toHTML_, gathrUnrelSub } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
 
 /** @final */
 export class Doment extends HTMLSn {
-  readonly snt_a_$: (HTMLTk | Elment | Proins)[] = [];
+  readonly ctnr_$;
 
-  children_$: (Elment | Proins)[] | undefined;
   override get children(): (Elment | Proins)[] {
-    return children(this);
+    return this.ctnr_$.children;
   }
 
+  declare protected frstTk$: HTMLTk | undefined;
   override get frstToken_1() {
-    return this.frstTk$ ??= frstToken_1(this);
+    return this.frstTk$ ??= this.ctnr_$.frstToken_1;
   }
+  declare protected lastTk$: HTMLTk | undefined;
   override get lastToken_1() {
-    return this.lastTk$ ??= lastToken_1(this);
+    return this.lastTk$ ??= this.ctnr_$.lastToken_1;
+  }
+
+  protected override get canEnsureBdries$(): boolean {
+    return !!this.ctnr_$.snt_a.length;
   }
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
 
@@ -67,29 +67,26 @@ export class Doment extends HTMLSn {
     return this;
   }
 
-  /** @const @param phTk_x `HTMLTok.placeholder` */
-  constructor(phTk_x: HTMLTk) {
-    super();
-    this.snt_a_$.push(phTk_x);
-    //jjjj TOCLEANUP
-    // phTk_x.htmlSn_$ = this;
-
-    this.ensureBdries();
+  constructor() {
+    super(Insmod.initial);
+    this.ctnr_$ = new HTMLCtnr(this);
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
-  apdSnt(...snts_x: (HTMLTk | Elment | Proins)[]): void {
-    apdSnt(this, ...snts_x);
-  }
-  insSnt(snt_x: HTMLTk | Elment | Proins, i_x?: int): void {
-    insSnt(this, snt_x, i_x);
-  }
-  rmvSnt(...snts_x: (HTMLTk | Elment | Proins)[]): void {
-    rmvSnt(this, ...snts_x);
-  }
-  tfrSntTo(tgtEl_x: HTMLCtnr, ...snts_x: (HTMLTk | Elment)[]): this {
-    tfrSntTo(this, tgtEl_x, ...snts_x);
-    return this;
+  /** @implement */
+  gathrUnrelSnt(
+    drtStrtLoc_x: Loc,
+    drtStopLoc_x: Loc,
+    unrelSnt_ss_x: SortedHTMLSnt_id,
+    unrelSn_ss_x: SortedSn_id,
+  ): uint {
+    return gathrUnrelSub(
+      this,
+      drtStrtLoc_x,
+      drtStopLoc_x,
+      unrelSnt_ss_x,
+      unrelSn_ss_x,
+    );
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
@@ -97,4 +94,12 @@ export class Doment extends HTMLSn {
     return _toHTML_(this);
   }
 }
+
+export interface Doment extends HTMLSn, HTMLCtnr {}
+merge({
+  srcClass: HTMLCtnr,
+  tgtClass: Doment,
+  tgtField: "ctnr_$",
+  ignrdKey: HTMLCtnr.impledMethod_a,
+});
 /*80--------------------------------------------------------------------------*/

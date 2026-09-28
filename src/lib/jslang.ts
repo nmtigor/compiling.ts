@@ -936,10 +936,10 @@ WritableStream.prototype[Symbol.asyncDispose] = async function (this) {
  * @param mixins_x
  *    Last element has the highest precedence, and so on.
  */
-export function mix<C extends Constructor | AbstractConstructor>(
+export const mix = <C extends Constructor | AbstractConstructor>(
   Base_x: C,
   ...mixins_x: (Constructor | AbstractConstructor)[]
-) {
+) => {
   abstract class Mix extends Base_x {}
   // console.log( Mix );
 
@@ -958,17 +958,17 @@ export function mix<C extends Constructor | AbstractConstructor>(
         key !== "prototype" &&
         key !== "name"
       ) {
-        const desc = Object.getOwnPropertyDescriptor(source, key);
-        if (desc !== undefined) Object.defineProperty(target, key, desc);
+        const desc = Reflect.getOwnPropertyDescriptor(source, key);
+        if (desc) Reflect.defineProperty(target, key, desc);
       }
     }
   }
 
   function deepcopyProperties(source: object, target: object) {
-    let o: object | null = source;
-    while (o) {
-      copyProperties(o, target);
-      o = Reflect.getPrototypeOf(o);
+    let o_: object | null = source;
+    while (o_) {
+      copyProperties(o_, target);
+      o_ = Reflect.getPrototypeOf(o_);
     }
   }
 
@@ -978,5 +978,47 @@ export function mix<C extends Constructor | AbstractConstructor>(
   }
 
   return Mix;
-}
+};
+
+type MergeP_<S, T> = {
+  srcClass: Constructor<S> | AbstractConstructor<S>;
+  tgtClass: Constructor<T> | AbstractConstructor<T>;
+  tgtField: keyof T;
+  ignrdKey?: (string | symbol)[];
+};
+/**
+ * @const @param srcClass
+ * @headconst @param tgtClass
+ * @const @param tgtField
+ * @const @param ignrdKey
+ */
+export const merge = <S, T>(
+  { srcClass, tgtClass, tgtField, ignrdKey }: MergeP_<S, T>,
+) => {
+  for (const key of Reflect.ownKeys(srcClass.prototype)) {
+    if (key === "constructor" || ignrdKey?.includes(key)) continue;
+
+    const desc = Reflect.getOwnPropertyDescriptor(srcClass.prototype, key);
+    if (!desc) continue;
+
+    if (Is.func(desc.value)) {
+      desc.value = function (this: T, ...args: unknown[]) {
+        return (this[tgtField] as any)[key](...args);
+      };
+      Reflect.defineProperty(tgtClass.prototype, key, desc);
+    } else if (desc.get || desc.set) {
+      if (desc.get) {
+        desc.get = function (this: T) {
+          return (this[tgtField] as any)[key];
+        };
+      }
+      if (desc.set) {
+        desc.set = function (this: T, val: unknown) {
+          (this[tgtField] as any)[key] = val;
+        };
+      }
+      Reflect.defineProperty(tgtClass.prototype, key, desc);
+    }
+  }
+};
 /*80--------------------------------------------------------------------------*/

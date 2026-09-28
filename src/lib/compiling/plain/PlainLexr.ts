@@ -3,7 +3,6 @@
  * @license MIT
  ******************************************************************************/
 
-import { fail } from "../../util.ts";
 import { Lexr } from "../Lexr.ts";
 import type { Ran } from "../Ran.ts";
 import { g_ran_fac } from "../RanFac.ts";

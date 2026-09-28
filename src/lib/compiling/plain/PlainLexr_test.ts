@@ -43,7 +43,7 @@ after(() => {
 });
 
 describe("PlainLexr.lex()", () => {
-  it("lex() one-line insert, delete, replace", () => {
+  it("Insert, delete, replace on one line", () => {
     init_();
 
     repl(rv(0, 0), "d");
@@ -121,7 +121,7 @@ describe("PlainLexr.lex()", () => {
     assertStrictEquals(lexr.stopLexTk_$, lexr.curLexTk_$);
   });
 
-  it("lex() multi-line insert, delete", () => {
+  it("Insert, delete on multiple lines", () => {
     init_("*");
 
     repl(ran(0).rv, "\n");
@@ -229,7 +229,7 @@ describe("PlainLexr.lex()", () => {
     // assertStrictEquals(lexr.stopLexTk_$, lexr.curLexTk_$);
   });
 
-  it("lex() insert at sob of multi-line", () => {
+  it("Insert at sob of multiple lines", () => {
     init_("a\nb");
 
     repl(rv(0, 0), ".");
@@ -249,7 +249,7 @@ describe("PlainLexr.lex()", () => {
     assertStrictEquals(lexr.stopLexTk_$, lexr.curLexTk_$);
   });
 
-  it("lex() multi-line replace", () => {
+  it("Replace on multiple lines", () => {
     init_(["ab", "cd", "ef"]);
 
     // repl( rv(0,0,1,10), "12\n34" );
@@ -359,7 +359,7 @@ describe("PlainLexr.lex()", () => {
     assertStrictEquals(lexr.stopLexTk_$, lexr.curLexTk_$);
   });
 
-  it("lex() if aoa", () => {
+  it("Edit if aoa", () => {
     init_(["ab", "cd", "ef"]);
 
     /*
@@ -459,7 +459,7 @@ describe("PlainLexr.lex()", () => {
     assertEquals(lexr._reusdTk_ss_._repr_(), ["plaintext[0-1,1-2)"]);
   });
 
-  it("drag on one line", () => {
+  it("Drag on one line", () => {
     init_("0 xyz");
 
     repla([
@@ -508,7 +508,7 @@ describe("PlainLexr.lex()", () => {
     assertEquals(lexr._reusdTk_ss_._repr_(), []);
   });
 
-  it("drag on two lines", () => {
+  it("Drag on two lines", () => {
     init_(["0 abc", "1 xyz"]);
 
     repla([
@@ -560,7 +560,7 @@ describe("PlainLexr.lex()", () => {
     assertEquals(lexr._reusdTk_ss_._repr_(), []);
   });
 
-  it("drag on three lines", () => {
+  it("Drag on three lines", () => {
     init_(["0 abc", "1 xyz", "2 uvw"]);
 
     /*

@@ -6,8 +6,7 @@
 import type { lnum_t, uint } from "@fe-lib/alias.ts";
 import type { Loc } from "../../Loc.ts";
 import type { MdextTk } from "../../Token.ts";
-import type { SortedSnt_id } from "../../util.ts";
-import { gathrUnrelTk_$ } from "../util.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
 import { Block } from "./Block.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -32,9 +31,9 @@ export class ThematicBreak extends Block {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
-    return gathrUnrelTk_$(this.#tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+    return this.#tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
   }
 
   override lidxOf(loc_x: Loc): lnum_t | -1 {

@@ -21,6 +21,8 @@ import { frstNon, lastNon, SortedSnt_id } from "../util.ts";
 import type { MdextLexr } from "./MdextLexr.ts";
 import { Block } from "./stnode/Block.ts";
 import type { Inline } from "./stnode/Inline.ts";
+import { Linkdef } from "./stnode/Linkdef.ts";
+import type { MdextSn } from "./stnode/MdextSn.ts";
 /*80--------------------------------------------------------------------------*/
 
 const ws_a_ = [/* "\t" */ 9, /* " " */ 0x20] as UInt16[];
@@ -194,30 +196,29 @@ export const _tag_ = (
   s_a.push(selfclosing ? " />" : ">");
   return s_a.join("");
 };
-/*64----------------------------------------------------------*/
+/*80--------------------------------------------------------------------------*/
 
-/**
- * @borrow @primaryconst @param tk_x
- * @borrow @primaryconst @param drtStrtLoc_x
- * @borrow @primaryconst @param drtStopLoc_x
- * @out @param unrelSnt_ss_x
- * @return count of what's gathered
- */
-export const gathrUnrelTk_$ = (
-  tk_x: MdextTk,
-  drtStrtLoc_x: Loc,
-  drtStopLoc_x: Loc,
-  unrelSnt_ss_x: SortedSnt_id,
-): uint => {
-  let ret = 0;
-  if (
-    tk_x.value !== BaseTok.unknown &&
-    (tk_x.sntStopLoc.posSE(drtStrtLoc_x) ||
-      tk_x.sntStrtLoc.posGE(drtStopLoc_x))
-  ) {
-    unrelSnt_ss_x.add(tk_x);
-    ret = 1;
+export class SortedMdextSnt_id extends SortedSnt_id<MdextSn | MdextTk> {
+  #n_Linkdef = 0;
+  get n_Linkdef() {
+    return this.#n_Linkdef;
   }
-  return ret;
-};
+
+  constructor() {
+    super();
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+  override add(val_x: MdextSn | MdextTk): uint | -1 {
+    const ret = super.add(val_x);
+    if (val_x instanceof Linkdef) this.#n_Linkdef += 1;
+    return ret;
+  }
+
+  override rmv(val_x: MdextSn | MdextTk): uint | -1 {
+    const ret = super.rmv(val_x);
+    if (val_x instanceof Linkdef) this.#n_Linkdef -= 1;
+    return ret;
+  }
+}
 /*80--------------------------------------------------------------------------*/

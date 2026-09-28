@@ -8,10 +8,10 @@ import { assert } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
 import type { Loc } from "../../Loc.ts";
 import { MdextTk } from "../../Token.ts";
-import type { SortedSnt_id } from "../../util.ts";
 import type { MdextLexr } from "../MdextLexr.ts";
 import { BlockCont } from "../alias.ts";
-import { _toHTML_, gathrUnrelTk_$ } from "../util.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
+import { _toHTML_ } from "../util.ts";
 import { Inline } from "./Inline.ts";
 import { ILoc, InlineBlock } from "./InlineBlock.ts";
 import { Paragraph } from "./Paragraph.ts";
@@ -159,24 +159,14 @@ export class ATXHeading extends Heading {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
-    let ret = gathrUnrelTk_$(
-      this.#headTk,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-    );
+    let ret = this.#headTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
 
     ret += super.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
 
     if (this.#tailTk) {
-      ret += gathrUnrelTk_$(
-        this.#tailTk,
-        drtStrtLoc_x,
-        drtStopLoc_x,
-        unrelSnt_ss_x,
-      );
+      ret += this.#tailTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
     return ret;
   }
@@ -295,16 +285,11 @@ export class SetextHeading extends Heading {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
     let ret = super.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
 
-    ret += gathrUnrelTk_$(
-      this.#tailTk,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-    );
+    ret += this.#tailTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     return ret;
   }
 

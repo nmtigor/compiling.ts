@@ -16,7 +16,7 @@ import { Ranval } from "./Ranval.ts";
 import { Snt } from "./Snt.ts";
 import type { Token } from "./Token.ts";
 import type { Tok } from "./alias.ts";
-import type { _OldInfo_ } from "./util.ts";
+import type { _OldInfo_, SortedSnt_id } from "./util.ts";
 import { SortedSn_depth, SortedSn_id } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -36,7 +36,7 @@ export type CalcCommonO_ = {
  * primaryconst: const exclude `#depth`, `frstTk$`, `lastTk$`
  */
 export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
-  static readonly #VALVE = 1_000;
+  static readonly VALVE = 1_000;
 
   /* #parent */
   #parent: Stnode<T> | undefined;
@@ -70,9 +70,9 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
   /** @final */
   get root_1() {
     let ret: Stnode<T> = this;
-    let valve = Stnode.#VALVE;
+    let valve = Stnode.VALVE;
     while (ret.#parent && --valve) ret = ret.#parent;
-    assert(valve, `Loop ${Stnode.#VALVE}(±1) times!`);
+    assert(valve, `Loop ${Stnode.VALVE}(±1) times!`);
     return ret;
   }
   /**
@@ -80,12 +80,12 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
    * @param sn_x inclusive
    */
   isAncestorOf(sn_x?: Stnode<T>) {
-    let valve = Stnode.#VALVE;
+    let valve = Stnode.VALVE;
     while (sn_x && --valve) {
       if (sn_x === this) return true;
       sn_x = sn_x.#parent;
     }
-    assert(valve, `Loop ${Stnode.#VALVE}(±1) times!`);
+    assert(valve, `Loop ${Stnode.VALVE}(±1) times!`);
     return false;
   }
   /* ~ */
@@ -212,7 +212,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
   get depth_1(): Depth_ {
     let retDe: Depth_ = 0;
     let pa_ = this.#parent;
-    let valve = Stnode.#VALVE;
+    let valve = Stnode.VALVE;
     while (pa_ && --valve) {
       retDe += 1;
       if (pa_.#depth >= 0) {
@@ -221,7 +221,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
       }
       pa_ = pa_.#parent;
     }
-    assert(valve, `Loop ${Stnode.#VALVE}(±1) times!`);
+    assert(valve, `Loop ${Stnode.VALVE}(±1) times!`);
 
     return this.#depth = retDe;
   }
@@ -242,14 +242,14 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
    */
   getSafeSn(unrelSns_x?: Stnode<any>[]) {
     let retSn: Stnode<T> = this;
-    let valve = Stnode.#VALVE;
+    let valve = Stnode.VALVE;
     while (retSn.isErr && retSn.#parent && --valve) {
       if (unrelSns_x) {
         retSn.#parent.filterChildrenTo(unrelSns_x, retSn);
       }
       retSn = retSn.#parent;
     }
-    assert(valve, `Loop ${Stnode.#VALVE}(±1) times!`);
+    assert(valve, `Loop ${Stnode.VALVE}(±1) times!`);
     return retSn;
   }
 
@@ -333,8 +333,8 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
    * @final
    * @const @param valve_x
    */
-  invalBdries(valve_x = Stnode.#VALVE): this {
-    assert(--valve_x, `Loop ${Stnode.#VALVE}(±1) times!`);
+  invalBdries(valve_x = Stnode.VALVE): this {
+    assert(--valve_x, `Loop ${Stnode.VALVE}(±1) times!`);
     if (this.frstTk$?.sn_$ === this) {
       this.frstTk$.sn_$ = undefined;
     }
@@ -472,6 +472,28 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   /**
+   * @final
+   * @primaryconst
+   * @borrow @primaryconst @param drtStrtLoc_x
+   * @borrow @primaryconst @param drtStopLoc_x
+   * @out @param unrelSnt_ss_x
+   */
+  gathrSelf(
+    drtStrtLoc_x: Loc,
+    drtStopLoc_x: Loc,
+    unrelSnt_ss_x: SortedSnt_id<any>,
+  ): 0 | 1 {
+    let ret: 0 | 1 = 0;
+    if (
+      this.sntStopLoc.posSE(drtStrtLoc_x) || this.sntStrtLoc.posGE(drtStopLoc_x)
+    ) {
+      unrelSnt_ss_x.add(this);
+      ret = 1;
+    }
+    return ret;
+  }
+
+  /**
    * @headconst @param _oldSn_x
    * @headconst @param _newSn_x
    */
@@ -485,6 +507,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
   removeSelf(drtPa_x?: Stnode<T>): void {
     (drtPa_x ?? this.#parent)?.replaceChild(this);
   }
+  /*49|||||||||||||||||||||||||||||||||||||||||||*/
 
   //jjjj TOCLEANUP
   // /**
@@ -657,7 +680,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
     /*#static*/ if (INOUT) {
       assert(sn_ss_x.length);
     }
-    let valve = this.#VALVE;
+    let valve = this.VALVE;
 
     const correct_ = (retSn_y: Stnode<any>) => {
       if (strtTk?.posSe(retSn_y.frstToken_1.prevToken_$)) {
@@ -667,7 +690,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
           }
           retSn_y = retSn_y.#parent!;
         } while (strtTk.posSe(retSn_y.frstToken_1.prevToken_$) && --valve);
-        assert(valve, `Loop ${this.#VALVE}(±1) times!`);
+        assert(valve, `Loop ${this.VALVE}(±1) times!`);
       }
       if (stopTk?.posGe(retSn_y.lastToken_1.nextToken_$)) {
         do {
@@ -676,21 +699,14 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
           }
           retSn_y = retSn_y.#parent!;
         } while (stopTk.posGe(retSn_y.lastToken_1.nextToken_$) && --valve);
-        assert(valve, `Loop ${this.#VALVE}(±1) times!`);
+        assert(valve, `Loop ${this.VALVE}(±1) times!`);
       }
 
       retSn_y = retSn_y.getSafeSn(unrelSn_a);
 
       if (unrelSn_ss) {
-        //jjjj TOCLEANUP
-        // /* 3305 */
-        // const tormvSn_a: Stnode<any>[] = [];
-        // for (const sn of unrelSn_ss.add_O(unrelSn_a)) {
-        //   if (sn.isAncestorOf(retSn_y)) tormvSn_a.push(sn);
-        // }
-        // unrelSn_ss.rmv_O(tormvSn_a);
         for (let i = unrelSn_ss.add_O(unrelSn_a).length; i--;) {
-          if (unrelSn_ss.at(i)!.isAncestorOf(retSn_y)) {
+          if (unrelSn_ss.ary[i].isAncestorOf(retSn_y)) {
             unrelSn_ss.splice(i, 1);
           }
         }
@@ -808,7 +824,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
       }
       break;
     }
-    assert(valve, `Loop ${this.#VALVE}(±1) times!`);
+    assert(valve, `Loop ${this.VALVE}(±1) times!`);
 
     const floatupAll = (): void => {
       let len = sn_ss_x.length;

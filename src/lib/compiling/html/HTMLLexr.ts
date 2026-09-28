@@ -4,6 +4,7 @@
  ******************************************************************************/
 
 import { entityPrefix_o } from "@fe-src/data/html/entities.ts";
+import { HTMLSn } from "@fe-src/lib/compiling/html/stnode/HTMLSn.ts";
 import { DEBUG, INOUT } from "@fe-src/preNs.ts";
 import type { uint, uint16, uint8 } from "../../alias.ts";
 import { Endpt } from "../../alias.ts";
@@ -38,6 +39,7 @@ import {
   entityOfPrefix,
   NumEntity_LI,
   Proins_LI,
+  SortedHTMLSnt_id,
   Tag_LI,
 } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
@@ -93,17 +95,6 @@ const Ctrl_m = new Map<uint8, uint16>(/* deno-fmt-ignore */ [
 //llll limit `VALVE` editing according to compiling
 /** @final */
 export class HTMLLexr extends Lexr<HTMLTok> {
-  #state = State.Data;
-  set state_$(_x: State) {
-    this.#state = _x;
-  }
-
-  /** in lowercase */
-  #lastTagname: string | undefined;
-  set lastTagname_$(_x: string | undefined) {
-    this.#lastTagname = _x;
-  }
-
   override get _err_(): ErrRepr[] {
     const retA: ErrRepr[] = [];
     for (const tk of this.errTk_ss$) {
@@ -125,14 +116,29 @@ export class HTMLLexr extends Lexr<HTMLTok> {
     return new HTMLTk(this, g_ran_fac.byLoc(this.curLoc$));
   }
   /* ~ */
-
-  #curQuot: /* '"' */ 0x22 | /* "'" */ 0x27 | undefined;
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
 
+  readonly unrelSnt_ss_$ = new SortedHTMLSnt_id();
+  readonly reusdSnt_ss_$ = new SortedHTMLSnt_id();
+
   #pazr!: HTMLPazr;
-  get _pazr_() {
+  get pazr_$() {
     return this.#pazr;
   }
+  /*49|||||||||||||||||||||||||||||||||||||||||||*/
+
+  #state = State.Data;
+  set state_$(_x: State) {
+    this.#state = _x;
+  }
+
+  /** in lowercase */
+  #lastTagname: string | undefined;
+  set lastTagname_$(_x: string | undefined) {
+    this.#lastTagname = _x;
+  }
+
+  #curQuot: /* '"' */ 0x22 | /* "'" */ 0x27 | undefined;
 
   /** @headconst @param bufr_x */
   private constructor(bufr_x: Bufr) {
@@ -157,50 +163,88 @@ export class HTMLLexr extends Lexr<HTMLTok> {
 
   override reset_Lexr(): this {
     super.reset_Lexr();
-    this.#state = State.Data;
     //jjjj TOCLEANUP
-    // this.#pazr = new HTMLPazr(this);
+    // this.#frstDocTk = undefined;
+    //jjjj TOCLEANUP
+    // this.#reset_HTMLLexr();
     this.#pazr.reset_Pazr();
+    return this;
+  }
+
+  #reset_HTMLLexr(): this {
+    this.#state = State.Data;
     return this;
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   protected override sufLexmrk$(): void {
+    this.unrelSnt_ss_$.reset_SortedSet();
+    this.reusdSnt_ss_$.reset_SortedSet();
+
     this.#pazr.pazPremrk_$().pazMrk_$();
   }
 
+  /**
+   * Fill `unrelSnt_ss_$`\
+   * Invoke this after `#pazr.unrelSn_ss_$` is correctly filled.
+   * @headconst @param sn_x
+   */
+  #gathrUnrelSntIn(sn_x: HTMLSn): void {
+    sn_x.gathrUnrelSnt(
+      this.drtStrtLoc$!,
+      this.drtStopLoc$!,
+      this.unrelSnt_ss_$,
+      this.#pazr.unrelSn_ss_$,
+    );
+  }
+
+  @out((self: HTMLLexr) => {
+    assert(self.curLexTk$ === self.pazr_$.curPazTk_$);
+    assert(self.stopLexTk$ === self.pazr_$.stopPazTk_$);
+  })
+  protected override preLex$(): void {
+    this.#gathrUnrelSntIn(this.#pazr.drtSn);
+
+    const origStrtTk = this.curLexTk$;
+    const origStopTk = this.stopLexTk$;
+    this.curLexTk$ = this.#pazr.curPazTk_$;
+    this.stopLexTk$ = this.#pazr.stopPazTk_$;
+    if (this.curLexTk$.posSe(origStrtTk)) {
+      this.batchBack_$(
+        (tk) => this.oldTk_ss$.add(tk),
+        origStrtTk,
+        this.curLexTk$,
+      );
+    }
+    if (this.stopLexTk$.posGe(origStopTk)) {
+      this.batchForw_$(
+        (tk) => this.oldTk_ss$.add(tk),
+        origStopTk,
+        this.stopLexTk$,
+      );
+    }
+
+    if ((this.curLexTk$ as HTMLTk).isChar) {
+      this.#state = (this.curLexTk$.lexdInfo as Chr_LI).state;
+    }
+
+    super.preLex$();
+  }
+
+  protected override sufLex$(): void {
+    this.#reset_HTMLLexr();
+    this.#pazr.reset_HTMLPazr_$();
+
+    ///
+  }
+
   protected override linkNextTk$(prevTk_x: HTMLTk, scandTk_x: HTMLTk): HTMLTk {
-    const retTk = super.linkNextTk$(prevTk_x, scandTk_x) as HTMLTk;
+    const retTk = prevTk_x.linkNext(scandTk_x) as HTMLTk;
     if (retTk === this.stopLexTk$) {
       this.#pazr.cleanup_$(this.curLoc$);
     } else {
       this.#pazr.pazScandTk_$(retTk);
     }
-    return retTk;
-  }
-
-  /** @headconst @param scandTks_x */
-  #lexScandTks(...scandTks_x: HTMLTk[]): HTMLTk {
-    /*#static*/ if (INOUT) {
-      assert(scandTks_x.length);
-      assert(this.lsTk$);
-    }
-    let i_ = 0;
-    //jjjj TOCLEANUP
-    // let retTk = this.lsTk$;
-    // if (!retTk) {
-    //   retTk = scandTks_x[0];
-    //   i_ = 1;
-    // }
-    let retTk = this.lsTk$!;
-    for (const iI = scandTks_x.length; i_ < iI; i_++) {
-      retTk = this.linkNextTk$(retTk, scandTks_x[i_]);
-      if (retTk.isErr) this.errTk_ss$.add(retTk);
-      retTk.syncRanval(); //!
-      this.scandTk_a$.push(retTk);
-    }
-    /*! to prevent `linkNextTk$()` and `scandTk_a$.push()` in `lex_impl$()` */
-    this.lsTk$ = undefined;
     return retTk;
   }
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
@@ -824,7 +868,7 @@ export class HTMLLexr extends Lexr<HTMLTok> {
         if (this.outTk$!.sntStrtLoc.posS(loc_u)) {
           this.outTk$!.setStop(tagTk.sntStrtLoc, HTMLTok.character);
           this.outTk$!.lexdInfo ??= new Chr_LI(this.#state);
-          this.outTk$ = this.#lexScandTks(this.outTk$!, tagTk);
+          this.outTk$ = this.linkScandTks$(this.outTk$!, tagTk) as HTMLTk;
         } else {
           this.outTk$!.destructor(); //!
           this.outTk$ = tagTk;
@@ -1427,7 +1471,7 @@ export class HTMLLexr extends Lexr<HTMLTok> {
         .lexdInfo = tk_.lexdInfo;
       tk_.setStop(pan_u.strtLoc, HTMLTok.character);
       tk_.lexdInfo = new Chr_LI(this.#state);
-      this.outTk$ = this.#lexScandTks(tk_, chrrefTk);
+      this.outTk$ = this.linkScandTks$(tk_, chrrefTk) as HTMLTk;
     } else {
       if (tk_.value === HTMLTok.character) {
         tk_.lexdInfo ??= new Chr_LI(this.#state);
@@ -1527,7 +1571,7 @@ export class HTMLLexr extends Lexr<HTMLTok> {
         setLI_(num_y, chrrefTk);
         tk_.setStop(poc_u, HTMLTok.character);
         tk_.lexdInfo ??= new Chr_LI(this.#state);
-        this.outTk$ = this.#lexScandTks(tk_, chrrefTk);
+        this.outTk$ = this.linkScandTks$(tk_, chrrefTk) as HTMLTk;
       } else {
         if (!this.reachLexBdry$() && this.curLoc$.ucod === /* ";" */ 0x3B) {
           this.curLoc$.forw();
@@ -2267,7 +2311,7 @@ export class HTMLLexr extends Lexr<HTMLTok> {
       this.outTk$!.setStop(outTk_1.sntStrtLoc, HTMLTok.character);
       //jjjj TOCLEANUP
       // this.outTk$!.lexdInfo ??= new Chr_LI(this.#state);
-      this.outTk$ = this.#lexScandTks(this.outTk$!, outTk_1);
+      this.outTk$ = this.linkScandTks$(this.outTk$!, outTk_1) as HTMLTk;
     } else {
       scanTk_x();
     }

@@ -3,6 +3,7 @@
  * @license MIT
  ******************************************************************************/
 
+import type { Insmod } from "../alias.ts";
 import { ContCat } from "../alias.ts";
 import type { HTMLTk } from "../HTMLTk.ts";
 import { SpecialCtnrEl } from "./SpecialCtnrEl.ts";
@@ -10,9 +11,12 @@ import { SpecialCtnrEl } from "./SpecialCtnrEl.ts";
 
 /** @final */
 export class P_El extends SpecialCtnrEl {
-  /** @const @param tk_x */
-  constructor(tk_x: HTMLTk) {
-    super("p", tk_x);
+  /**
+   * @const @param insmod_x
+   * @const @param tk_x
+   */
+  constructor(insmod_x: Insmod, tk_x: HTMLTk) {
+    super(insmod_x, "p", tk_x);
     this.contCat$ = ContCat.flow | ContCat.palpable;
   }
 }

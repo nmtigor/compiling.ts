@@ -9,14 +9,13 @@ import { assert } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
 import type { Loc } from "../../Loc.ts";
 import type { MdextTk } from "../../Token.ts";
-import type { SortedSnt_id } from "../../util.ts";
 import type { FencedCBHead_LI, MdextLexr } from "../MdextLexr.ts";
 import type { BlockCont } from "../alias.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
 import {
   _escapeXml_,
   _tag_,
   _unescapeString_,
-  gathrUnrelTk_$,
   lastNonblankIn,
 } from "../util.ts";
 import { Block } from "./Block.ts";
@@ -48,11 +47,11 @@ export abstract class CodeBlock extends Block {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
     let ret = 0;
     for (const tk of this.chunkTk_a$) {
-      ret += gathrUnrelTk_$(tk, drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+      ret += tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
     return ret;
   }
@@ -221,33 +220,19 @@ export class FencedCodeBlock extends CodeBlock {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
   ): uint {
-    let ret = gathrUnrelTk_$(
-      this.#headTk,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-    );
+    let ret = this.#headTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
 
     if (this.#headChunkTk) {
-      ret += gathrUnrelTk_$(
-        this.#headChunkTk,
-        drtStrtLoc_x,
-        drtStopLoc_x,
-        unrelSnt_ss_x,
-      );
+      ret += this.#headChunkTk
+        .gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
 
     ret += super.gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
 
     if (this.#tailTk) {
-      ret += gathrUnrelTk_$(
-        this.#tailTk,
-        drtStrtLoc_x,
-        drtStopLoc_x,
-        unrelSnt_ss_x,
-      );
+      ret += this.#tailTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     }
     return ret;
   }

@@ -62,6 +62,11 @@ export class URILexr extends Lexr<URITok> {
   ) {
     super(bufr_x, strtLoff_x, stopLoff_x);
   }
+
+  #reset_URILexr(): this {
+    this.#ctx = Ctx_.uri;
+    return this;
+  }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   /** For uri, always `lex()` from `frstLexTk`(for the moment). */
@@ -74,9 +79,15 @@ export class URILexr extends Lexr<URITok> {
     return undefined;
   }
 
-  protected override preLex$(): void {
-    super.preLex$();
-    this.#ctx = Ctx_.uri;
+  //jjjj TOCLEANUP
+  // protected override preLex$(): void {
+  //   super.preLex$();
+  //   //jjjj TOCLEANUP
+  //   // this.#ctx = Ctx_.uri;
+  // }
+
+  protected override sufLex$(): void {
+    this.#reset_URILexr();
   }
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
 

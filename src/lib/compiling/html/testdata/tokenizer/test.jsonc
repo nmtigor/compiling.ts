@@ -1,12 +1,11 @@
 {
   "tests": [
     {
-      "description": "<a//>",
-      "input": "<a//>",
-      "output": [["StartTag", "a", {}, true]],
-      "errors": [
-        { "code": "unexpected-solidus-in-tag", "line": 1, "col": 4 }
-      ]
+      "description": "lowercase endtags",
+      "initialStates": ["RCDATA state", "RAWTEXT state", "Script data state"],
+      "lastStartTag": "xmp",
+      "input": "</XMP>",
+      "output": [["EndTag", "xmp"]]
     }
   ]
 }

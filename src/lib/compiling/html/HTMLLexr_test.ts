@@ -152,8 +152,8 @@ describe("Compiling in body", () => {
   it("Start p-like tag", () => {
     init_("<!DOCTYPE html><p>abc");
     assertEquals(lexr.isErr, false);
-    assertEquals(lexr._pazr_.isErr, false);
-    assertEquals(lexr._pazr_._root_?._toHTML_(), [
+    assertEquals(lexr.pazr_$.isErr, false);
+    assertEquals(lexr.pazr_$._root_?._toHTML_(), [
       "| <!DOCTYPE html>",
       "| <html>",
       "|   <head>",
@@ -167,8 +167,8 @@ describe("Compiling in body", () => {
     <!DOCTYPE html><p>abcd
     */
     assertEquals(lexr.isErr, false);
-    assertEquals(lexr._pazr_.isErr, false);
-    assertEquals(lexr._pazr_._root_?._toHTML_(), [
+    assertEquals(lexr.pazr_$.isErr, false);
+    assertEquals(lexr.pazr_$._root_?._toHTML_(), [
       "| <!DOCTYPE html>",
       "| <html>",
       "|   <head>",

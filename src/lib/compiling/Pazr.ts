@@ -231,7 +231,7 @@ export abstract class Pazr<T extends Tok = BaseTok> {
     this.destructor();
 
     this.lexr$ = lexr_x;
-    this.curPazTk$ = this.lexr$.frstLexTk;
+    this.strtPazTk$ = this.curPazTk$ = this.lexr$.frstLexTk;
     this.stopPazTk$ = this.lexr$.lastLexTk;
 
     this.#destroyed = false;
@@ -288,7 +288,8 @@ export abstract class Pazr<T extends Tok = BaseTok> {
         Stnode.sn_ss.add(snClrTk_1.sn_$!);
       }
       if (Stnode.sn_ss.length === 0) {
-        Stnode.sn_ss.add(snClrTk_0?.sn_$ ?? snClrTk_1!.sn_$!);
+        if (snClrTk_0) Stnode.sn_ss.add(snClrTk_0.sn_$!);
+        if (snClrTk_1) Stnode.sn_ss.add(snClrTk_1.sn_$!);
       }
       Stnode.sn_ss.add_O(this.errSn_ss$.ary);
       tip = Stnode.calcCommon({

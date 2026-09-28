@@ -29,7 +29,7 @@ import { SetTok } from "./set/SetTok.ts";
 import { Snt } from "./Snt.ts";
 import { Stnode } from "./Stnode.ts";
 import { URITok } from "./uri/URITok.ts";
-import type { _OldInfo_, LexdInfo } from "./util.ts";
+import type { _OldInfo_, LexdInfo, SortedSnt_id } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
 
 //jjjj TOCLEANUP
@@ -485,6 +485,30 @@ export class Token<T extends Tok = BaseTok> extends Snt {
     // console.log(this.stnode);
     // console.log(rhs.stnode);
     return this;
+  }
+
+  /**
+   * @final
+   * @primaryconst
+   * @borrow @primaryconst @param drtStrtLoc_x
+   * @borrow @primaryconst @param drtStopLoc_x
+   * @out @param unrelSnt_ss_x
+   */
+  gathrSelf(
+    drtStrtLoc_x: Loc,
+    drtStopLoc_x: Loc,
+    unrelSnt_ss_x: SortedSnt_id<any>,
+  ): 0 | 1 {
+    let ret: 0 | 1 = 0;
+    if (
+      this.value !== BaseTok.unknown &&
+      (this.sntStopLoc.posSE(drtStrtLoc_x) ||
+        this.sntStrtLoc.posGE(drtStopLoc_x))
+    ) {
+      unrelSnt_ss_x.add(this);
+      ret = 1;
+    }
+    return ret;
   }
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
 

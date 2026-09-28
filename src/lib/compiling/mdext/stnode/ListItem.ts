@@ -6,10 +6,11 @@
 import type { lcol_t, lnum_t, uint } from "@fe-lib/alias.ts";
 import type { Loc } from "../../Loc.ts";
 import type { MdextTk } from "../../Token.ts";
-import { SortedSn_id, SortedSnt_id } from "../../util.ts";
+import type { SortedSn_id } from "../../util.ts";
 import type { ListMrkr_LI, MdextLexr } from "../MdextLexr.ts";
 import type { BlockCont } from "../alias.ts";
-import { _toHTML_, gathrUnrelTk_$ } from "../util.ts";
+import type { SortedMdextSnt_id } from "../util.ts";
+import { _toHTML_ } from "../util.ts";
 import { Block } from "./Block.ts";
 import { CtnrBlock } from "./CtnrBlock.ts";
 import { Inline } from "./Inline.ts";
@@ -80,7 +81,7 @@ export abstract class ListItem extends CtnrBlock {
   override gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedSnt_id,
+    unrelSnt_ss_x: SortedMdextSnt_id,
     unrelSn_ss_x: SortedSn_id,
   ): uint {
     let ret = super.gathrUnrelSnt(
@@ -90,12 +91,7 @@ export abstract class ListItem extends CtnrBlock {
       unrelSn_ss_x,
     );
 
-    ret += gathrUnrelTk_$(
-      this.#mrkrTk,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-    );
+    ret += this.#mrkrTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
     return ret;
   }
 
