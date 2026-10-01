@@ -4,7 +4,6 @@
  ******************************************************************************/
 
 import { entityPrefix_o } from "@fe-src/data/html/entities.ts";
-import { HTMLSn } from "@fe-src/lib/compiling/html/stnode/HTMLSn.ts";
 import { DEBUG, INOUT } from "@fe-src/preNs.ts";
 import type { uint, uint16, uint8 } from "../../alias.ts";
 import { Endpt } from "../../alias.ts";
@@ -26,12 +25,13 @@ import type { Loc } from "../Loc.ts";
 import type { Ran } from "../Ran.ts";
 import { g_ran_fac } from "../RanFac.ts";
 import { Ranval } from "../Ranval.ts";
-import { ErrMsg } from "../util.ts";
+import { ErrMsg, SortedTk_id } from "../util.ts";
 import type { ErrRepr, TokenRepr } from "./alias.ts";
 import { State, TagNS } from "./alias.ts";
 import { HTMLPazr } from "./HTMLPazr.ts";
 import { HTMLTk } from "./HTMLTk.ts";
 import { HTMLTok } from "./HTMLTok.ts";
+import type { HTMLSn } from "./stnode/HTMLSn.ts";
 import {
   Chr_LI,
   Comment_LI,
@@ -39,7 +39,6 @@ import {
   entityOfPrefix,
   NumEntity_LI,
   Proins_LI,
-  SortedHTMLSnt_id,
   Tag_LI,
 } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
@@ -118,8 +117,8 @@ export class HTMLLexr extends Lexr<HTMLTok> {
   /* ~ */
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
 
-  readonly unrelSnt_ss_$ = new SortedHTMLSnt_id();
-  readonly reusdSnt_ss_$ = new SortedHTMLSnt_id();
+  readonly unrelTk_ss_$ = new SortedTk_id();
+  readonly reusdTk_ss_$ = new SortedTk_id();
 
   #pazr!: HTMLPazr;
   get pazr_$() {
@@ -178,14 +177,14 @@ export class HTMLLexr extends Lexr<HTMLTok> {
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   protected override sufLexmrk$(): void {
-    this.unrelSnt_ss_$.reset_SortedSet();
-    this.reusdSnt_ss_$.reset_SortedSet();
+    this.unrelTk_ss_$.reset_SortedSet();
+    this.reusdTk_ss_$.reset_SortedSet();
 
     this.#pazr.pazPremrk_$().pazMrk_$();
   }
 
   /**
-   * Fill `unrelSnt_ss_$`\
+   * Fill `unrelTk_ss_$`\
    * Invoke this after `#pazr.unrelSn_ss_$` is correctly filled.
    * @headconst @param sn_x
    */
@@ -193,9 +192,10 @@ export class HTMLLexr extends Lexr<HTMLTok> {
     sn_x.gathrUnrelSnt(
       this.drtStrtLoc$!,
       this.drtStopLoc$!,
-      this.unrelSnt_ss_$,
+      this.unrelTk_ss_$,
       this.#pazr.unrelSn_ss_$,
     );
+    this.#pazr.unrelSn_ss_$.rmv(sn_x);
   }
 
   @out((self: HTMLLexr) => {
@@ -2289,6 +2289,50 @@ export class HTMLLexr extends Lexr<HTMLTok> {
    * @implement
    */
   protected scan_impl$(): HTMLTk | undefined {
+    if (this.unrelTk_ss_$.length) {
+      /** @headconst @param tk_y */
+      const reuseTk_ = (tk_y: HTMLTk): void => {
+        this.unrelTk_ss_$.rmv(tk_y);
+        this.reusdTk_ss_$.add(tk_y);
+        this.outTk$ = tk_y;
+      };
+      if (this.#state === State.Data) {
+        for (const snt of this.unrelTk_ss_$) {
+          if (
+            snt.sntStrtLoc.posE(this.curLoc$) &&
+            snt instanceof HTMLTk && snt.value !== HTMLTok.placeholder
+          ) {
+            reuseTk_(snt);
+            break;
+          }
+        }
+      } else if (this.#state === State.RCDATA) {
+        for (const snt of this.unrelTk_ss_$) {
+          if (
+            snt.sntStrtLoc.posE(this.curLoc$) &&
+            snt instanceof HTMLTk && snt.isChar
+          ) {
+            reuseTk_(snt);
+            break;
+          }
+        }
+      } else {
+        for (const snt of this.unrelTk_ss_$) {
+          if (
+            snt.sntStrtLoc.posE(this.curLoc$) &&
+            snt instanceof HTMLTk && snt.value === HTMLTok.character
+          ) {
+            reuseTk_(snt);
+            break;
+          }
+        }
+      }
+      if (this.outTk$) {
+        this.curLoc$.become_Loc(this.outTk$.sntStopLoc);
+        return this.outTk$;
+      }
+    }
+
     this.outTk_1$;
     this.outTk$!.lexdInfo = new Chr_LI(this.#state);
     /* final switch */ ({

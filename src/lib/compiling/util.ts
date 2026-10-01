@@ -169,7 +169,7 @@ export type _OldInfo_ = {
   info: string;
 };
 
-export class SortedSnt_id<T extends Snt = Snt> extends SortedIdo<T> {
+export class SortedSnt_id<V extends Snt = Snt> extends SortedIdo<V> {
   /** @final */
   _repr_(): string[] {
     const ret: _OldInfo_[] = [];

@@ -41,7 +41,7 @@ export class Intersect extends BinaryOp {
   override readonly op = "∩";
   static override readonly oprec = Oprec.intersect;
 
-  readonly err_hl_name = `${this.class_id}_err`;
+  readonly err_hln = `${this.class_id}_err`;
   get #err_hl(): Highlight {
     this.hl_a$ ??= [];
     return this.hl_a$[2] ??= new Highlight();
@@ -67,12 +67,12 @@ export class Intersect extends BinaryOp {
     }
 
     /*#static*/ if (!DENO) {
-      CSS.highlights.set(this.err_hl_name, this.#err_hl);
+      CSS.highlights.set(this.err_hln, this.#err_hl);
 
       document.body.style.setProperty(this.#errTd_pn, this.#errTd_p.cssc);
 
       document[$CSS].insertRule(
-        `::highlight(${this.err_hl_name}) {
+        `::highlight(${this.err_hln}) {
           text-decoration: var(${this.#errTd_pn}) wavy underline;
           text-underline-offset: .2em;
         }`,
@@ -103,12 +103,12 @@ export class Intersect extends BinaryOp {
 
     /*#static*/ if (!DENO) {
       document[$CSS].deleteSelector(
-        `::highlight(${this.err_hl_name})`,
+        `::highlight(${this.err_hln})`,
       );
 
       document.body.style.removeProperty(this.#errTd_pn);
 
-      CSS.highlights.delete(this.err_hl_name);
+      CSS.highlights.delete(this.err_hln);
     }
 
     super.destructor();
@@ -116,19 +116,21 @@ export class Intersect extends BinaryOp {
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   protected override setHighlight_impl$(
+    eranr_x: ERanr,
     frstLidx_x: lnum_t,
     lastLidx_x: lnum_t,
-    eranr_x: ERanr,
   ): boolean {
-    const snHled = super.setHighlight_impl$(frstLidx_x, lastLidx_x, eranr_x);
+    if (!super.setHighlight_impl$(eranr_x, frstLidx_x, lastLidx_x)) {
+      return false;
+    }
 
     this.#clr_err_hl();
 
-    if (snHled && this.hasErrMsg(ErrMsg.set_intersect_no_rhs)) {
-      this.#err_hl.add(this.range_$);
+    if (this.hasErrMsg(ErrMsg.set_intersect_no_rhs)) {
+      this.setHl_$(this.#err_hl, eranr_x, frstLidx_x, lastLidx_x);
     }
 
-    return snHled;
+    return true;
   }
 }
 /*80--------------------------------------------------------------------------*/

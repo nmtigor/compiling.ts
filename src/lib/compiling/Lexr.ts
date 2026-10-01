@@ -944,7 +944,7 @@ export abstract class Lexr<T extends Tok = BaseTok> {
   }
 
   /**
-   * Lex [ `curLexTk$.sntStopLoc`, `stopLexTk$.sntStrtLoc` )\
+   * Lex `[ curLexTk$.sntStopLoc, stopLexTk$.sntStrtLoc )`\
    * @final
    */
   protected lex_impl$(): this {

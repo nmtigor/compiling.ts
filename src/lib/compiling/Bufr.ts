@@ -629,11 +629,7 @@ export class Bufr {
     if (this.#focusLoc) {
       this.#focusLoc.set_Loc_O(retRv_x.focusLidx, retRv_x.focusLoff, this);
     } else {
-      this.#focusLoc = Loc.create(
-        this,
-        retRv_x.focusLidx,
-        retRv_x.focusLoff,
-      );
+      this.#focusLoc = Loc.create(this, retRv_x.focusLidx, retRv_x.focusLoff);
     }
     retRv_x.setFocus(this.#focusLoc.line.lidx_1, this.#focusLoc.correctLoff());
     return retRv_x;
@@ -660,11 +656,7 @@ export class Bufr {
     if (this.#anchrLoc) {
       this.#anchrLoc.set_Loc_O(retRv_x.anchrLidx, retRv_x.anchrLoff, this);
     } else {
-      this.#anchrLoc = Loc.create(
-        this,
-        retRv_x.anchrLidx,
-        retRv_x.anchrLoff,
-      );
+      this.#anchrLoc = Loc.create(this, retRv_x.anchrLidx, retRv_x.anchrLoff);
     }
     retRv_x.setAnchr(this.#anchrLoc.line.lidx_1, this.#anchrLoc.correctLoff());
     return retRv_x;

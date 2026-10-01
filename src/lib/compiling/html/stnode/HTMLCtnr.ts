@@ -6,6 +6,8 @@
 import type { int, uint } from "@fe-lib/alias.ts";
 import { assert, out } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
+import type { Loc } from "../../Loc.ts";
+import type { SortedSn_id, SortedTk_id } from "../../util.ts";
 import { HTMLTk } from "../HTMLTk.ts";
 import { HTMLTok } from "../HTMLTok.ts";
 import { CtnrEl } from "./CtnrEl.ts";
@@ -15,7 +17,7 @@ import type { Proins } from "./Proins.ts";
 /*80--------------------------------------------------------------------------*/
 
 /** @final */
-export class HTMLCtnr {
+export class HTMLCtnrImpl {
   readonly #host;
 
   private readonly _snt_a: (HTMLTk | Elment | Proins)[] = [];
@@ -135,7 +137,7 @@ export class HTMLCtnr {
    * @headconst @param snts_x (Part of) `_snt_a` of `this`\
    *    MUST be in the same order as in `_snt_a`
    */
-  @out((self: HTMLCtnr, _, args) => {
+  @out((self: HTMLCtnrImpl, _, args) => {
     assert(
       self._snt_a.length ||
         (args[0] as HTMLTk).value === HTMLTok.placeholder,
@@ -189,6 +191,28 @@ export class HTMLCtnr {
     return this;
   }
 
+  gathrUnrelSub(
+    drtStrtLoc_x: Loc,
+    drtStopLoc_x: Loc,
+    unrelTk_ss_x: SortedTk_id,
+    unrelSn_ss_x: SortedSn_id,
+  ): uint {
+    let ret = 0;
+    for (const snt of this.snt_a) {
+      if (snt instanceof HTMLTk) {
+        ret += snt.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelTk_ss_x);
+      } else {
+        ret += snt.gathrUnrelSnt(
+          drtStrtLoc_x,
+          drtStopLoc_x,
+          unrelTk_ss_x,
+          unrelSn_ss_x,
+        );
+      }
+    }
+    return ret;
+  }
+
   /** `in( this.inCompiling)` */
   rmvCur(): void {
     const [rmvd] = this._snt_a.splice(this.#iCurChild, 1);
@@ -201,8 +225,10 @@ export class HTMLCtnr {
     this.#children = undefined;
     this.#host.invalBdries();
   }
-  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
-
-  static readonly impledMethod_a = ["children", "frstToken_1", "lastToken_1"];
 }
+
+type HTMLCtnrIgnrdKeys = "gathrUnrelSub";
+export const HTMLCtnrIgnrdKeys = ["gathrUnrelSub"];
+
+export type HTMLCtnr = Omit<HTMLCtnrImpl, HTMLCtnrIgnrdKeys>;
 /*80--------------------------------------------------------------------------*/

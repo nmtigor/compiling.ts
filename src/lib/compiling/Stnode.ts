@@ -5,7 +5,7 @@
 
 import type { ERan, ERanr } from "@fe-edt/ERan.ts";
 import { INOUT, PRF } from "../../preNs.ts";
-import type { int, lnum_t, loff_t, uint } from "../alias.ts";
+import type { id_t, int, lnum_t, loff_t, uint } from "../alias.ts";
 import type { Ts_t } from "../alias_v.ts";
 import { assert, fail, out } from "../util.ts";
 import { g_count } from "../util/performance.ts";
@@ -18,6 +18,7 @@ import type { Token } from "./Token.ts";
 import type { Tok } from "./alias.ts";
 import type { _OldInfo_, SortedSnt_id } from "./util.ts";
 import { SortedSn_depth, SortedSn_id } from "./util.ts";
+import type { SortedIdo, SortedSet } from "../util/SortedSet.ts";
 /*80--------------------------------------------------------------------------*/
 
 type Depth_ = uint | -1;
@@ -324,6 +325,29 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
   }
   /* ~ */
 
+  /**
+   * @out @param out_x
+   * @return count of what're gathered
+   */
+  gathrAllTks(out_x: SortedSet<any>): uint {
+    let ret = 0;
+    let tk_: Token<T> | undefined = this.frstToken_1;
+    const lastTk = this.lastToken_1;
+    const VALVE = 1_000_000;
+    let valve = VALVE;
+    for (; tk_ && tk_ !== lastTk && --valve; tk_ = tk_.nextToken_$) {
+      out_x.add(tk_);
+      ret += 1;
+    }
+    assert(valve, `Loop ${VALVE}(±1) times!`);
+    /*#static*/ if (INOUT) {
+      assert(tk_ === lastTk);
+    }
+    out_x.add(lastTk);
+    ret += 1;
+    return ret;
+  }
+
   //jjjj Could impl for different Stnode subclasses to optimize performance slightly
   /** `in( this.#parent)` */
   protected get asBdry$(): boolean {
@@ -334,7 +358,7 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
    * @const @param valve_x
    */
   invalBdries(valve_x = Stnode.VALVE): this {
-    assert(--valve_x, `Loop ${Stnode.VALVE}(±1) times!`);
+    assert(valve_x, `Loop ${Stnode.VALVE}(±1) times!`);
     if (this.frstTk$?.sn_$ === this) {
       this.frstTk$.sn_$ = undefined;
     }
@@ -418,14 +442,15 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
    * @final
    * @const @param ts_x
    * @const @param rt_x
+   * @const @param valve_x
    */
-  valid_$(ts_x: Ts_t, rt_x?: Stnode<T>, valve_x = 1_000): boolean {
-    assert(--valve_x, "Loop 1_000(±1) times!");
+  valid_$(ts_x: Ts_t, rt_x?: Stnode<T>, valve_x = Stnode.VALVE): boolean {
+    assert(valve_x, `Loop ${Stnode.VALVE}(±1) times!`);
     if (this.#checkTs < ts_x) {
       if (rt_x) {
         this.#valid = this.#parent === rt_x || this === rt_x
           ? true
-          : !!this.#parent?.valid_$(ts_x, rt_x, valve_x);
+          : !!this.#parent?.valid_$(ts_x, rt_x, valve_x - 1);
       } else {
         this.#valid = false;
       }
@@ -861,14 +886,10 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
    * @final
    * @return `#highlighted`
    */
-  clrHighlight(): boolean {
+  clrHighlight(): false {
     if (this.#highlighted) {
       this.clrHighlight_impl$();
-
-      this.hl_a$?.forEach((hl) => hl.clear());
-      if (this.children) {
-        for (const c of this.children) c.clrHighlight();
-      }
+      this.children?.forEach((c) => c.clrHighlight());
     }
     return this.#highlighted = false;
   }
@@ -876,15 +897,15 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
   /**
    * Assign `Token.eran$` on specific Token's, then add Range's to `hl_a$`\
    * `in( _frstLidx_x <= _lastLidx_x)`
+   * @headconst @param eranr_x
    * @const @param _frstLidx_x
    * @const @param _lastLidx_x
-   * @headconst @param eranr_x
    * @return Highlighted or not
    */
   protected setHighlight_impl$(
+    _eranr_x: ERanr,
     _frstLidx_x: lnum_t,
     _lastLidx_x: lnum_t,
-    _eranr_x: ERanr,
   ): boolean {
     return false;
   }
@@ -892,33 +913,27 @@ export abstract class Stnode<T extends Tok = BaseTok> extends Snt {
    * Set `#highlighted`\
    * `in( frstLidx_x <= lastLidx_x)`
    * @final
+   * @headconst @param eranr_x
    * @const @param frstLidx_x
    * @const @param lastLidx_x
-   * @headconst @param eranr_x
    * @return `#highlighted`
    */
   setHighlight(
+    eranr_x: ERanr,
     frstLidx_x: lnum_t,
     lastLidx_x: lnum_t,
-    eranr_x: ERanr,
   ): boolean {
     const frstLidx = this.sntFrstLidx_1;
     if (lastLidx_x < frstLidx) return this.clrHighlight();
     const lastLidx = this.sntLastLidx_1;
     if (lastLidx < frstLidx_x) return this.clrHighlight();
 
-    this.#highlighted = this.setHighlight_impl$(
-      frstLidx_x,
-      lastLidx_x,
-      eranr_x,
-    );
-
-    if (this.children) {
-      for (const c of this.children) {
-        const hl_ = c.setHighlight(frstLidx_x, lastLidx_x, eranr_x);
-        this.#highlighted ||= hl_;
-      }
-    }
+    this.#highlighted = this
+      .setHighlight_impl$(eranr_x, frstLidx_x, lastLidx_x);
+    this.children?.forEach((c) => {
+      const hl_ = c.setHighlight(eranr_x, frstLidx_x, lastLidx_x);
+      this.#highlighted ||= hl_;
+    });
     return this.#highlighted;
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/

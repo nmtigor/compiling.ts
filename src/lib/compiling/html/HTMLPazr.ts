@@ -194,7 +194,7 @@ class Opnels_ extends Array<CtnrEl> {
    * @const @param tns_x
    * @return The first (in reverse order) CtnrEl not in `tns_x`
    */
-  hasOnlyTns(tns_x: string[]): CtnrEl | undefined {
+  frstNotIn(tns_x: string[]): CtnrEl | undefined {
     for (let i = this.length; i--;) {
       const el_i = this[i];
       if (!tns_x.includes(el_i.tagname)) return el_i;
@@ -219,11 +219,12 @@ class Opnels_ extends Array<CtnrEl> {
   /**
    * [have an element target node in a specific scope](https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-the-specific-scope)
    * @const
-   * @const @param scope_x
-   * @const @param tns_x
+   * @const @param scope_x "list"
+   * @const @param tns_x "target node"
    */
   scopingTns(scope_x: string[], ...tns_x: string[]): boolean {
     for (let i = this.length; i--;) {
+      /** "node" */
       const tn_i = this[i].tagname;
       if (tns_x.includes(tn_i)) return true;
       if (scope_x.includes(tn_i)) return false;
@@ -255,7 +256,7 @@ class Opnels_ extends Array<CtnrEl> {
     let tip;
     for (
       tip = this.pop();
-      tip && allTns_x.includes(tip.tagname) && olrTn_x !== tip.tagname;
+      tip && allTns_x.includes(tip.tagname) && tip.tagname !== olrTn_x;
       tip = this.pop()
     );
     /*#static*/ if (INOUT) {
@@ -794,31 +795,31 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     } else if (tk_x.openTag("html")) {
       this.#paz_in_body(tk_x);
     } else if (tk_x.openTag("base", "link")) {
-      this.#insEl(createEl(this.#insmod, tk_x), tip_0);
+      this.#insEl(this.#createEl(tk_x), tip_0);
     } else if (tk_x.openTag("meta")) {
-      this.#insEl(createEl(this.#insmod, tk_x), tip_0);
+      this.#insEl(this.#createEl(tk_x), tip_0);
     } else if (tk_x.openTag("title")) {
       this.#intoText(
         State.RCDATA,
-        createEl(this.#insmod, tk_x) as Title_El,
+        this.#createEl(tk_x) as Title_El,
         tip_0,
       );
     } else if (tk_x.openTag("style")) {
       this.#intoText(
         State.RAWTEXT,
-        createEl(this.#insmod, tk_x) as Style_El,
+        this.#createEl(tk_x) as Style_El,
         tip_0,
       );
     } else if (tk_x.openTag("noscript")) {
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, tip_0),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, tip_0),
       );
 
       this.#insmod = Insmod.in_head_noscript;
     } else if (tk_x.openTag("script")) {
       this.#intoText(
         State.Script,
-        createEl(this.#insmod, tk_x) as Script_El,
+        this.#createEl(tk_x) as Script_El,
         tip_0,
       );
     } else if (tk_x.clozTag("head")) {
@@ -831,7 +832,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       else_();
     } else if (tk_x.openTag("template")) {
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, tip_0),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, tip_0),
       );
 
       this.#afels.apdMrk();
@@ -1094,7 +1095,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       }
     } else if (tk_x.clozTag("body")) {
       if (this.#opnels.scopingTns(scopeTn_a_, "body")) {
-        const sn_ = this.#opnels.hasOnlyTns(autoClozTn_3_a_)
+        const sn_ = this.#opnels.frstNotIn(autoClozTn_3_a_)
           ?.setErr({
             msg: ErrMsg.html_wrong_endtag,
             rv: Ranval.fromRan(tk_x.ran_$),
@@ -1113,7 +1114,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       }
     } else if (tk_x.clozTag("html")) {
       if (this.#opnels.scopingTns(scopeTn_a_, "body")) {
-        const sn_ = this.#opnels.hasOnlyTns(autoClozTn_3_a_)
+        const sn_ = this.#opnels.frstNotIn(autoClozTn_3_a_)
           ?.setErr({
             msg: ErrMsg.html_wrong_endtag,
             rv: Ranval.fromRan(tk_x.ran_$),
@@ -1134,7 +1135,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         this.#opnels.clozTn({ tn: "p", allTns: autoClozTn_a_, errTk: tk_x });
       }
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag(...hn_a_)) {
       if (this.#opnels.scopingTns(buttonScopeTn_a_, "p")) {
@@ -1148,14 +1149,14 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         this.#opnels.pop();
       }
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag("pre")) {
       if (this.#opnels.scopingTns(buttonScopeTn_a_, "p")) {
         this.#opnels.clozTn({ tn: "p", allTns: autoClozTn_a_, errTk: tk_x });
       }
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag("form")) {
       const ot_ = this.#opnels.hasTn("template");
@@ -1169,7 +1170,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
           this.#opnels.clozTn({ tn: "p", allTns: autoClozTn_a_, errTk: tk_x });
         }
         const el_ = this.#insEl(
-          createEl(this.#insmod, tk_x) as Form_El,
+          this.#createEl(tk_x) as Form_El,
           this.#tip,
         );
         this.#opnels.push(el_);
@@ -1196,7 +1197,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         this.#opnels.clozTn({ tn: "p", allTns: autoClozTn_a_, errTk: tk_x });
       }
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag("dd", "dt")) {
       for (let i = this.#opnels.length; i--;) {
@@ -1221,7 +1222,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         this.#opnels.clozTn({ tn: "p", allTns: autoClozTn_a_, errTk: tk_x });
       }
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag("button")) {
       if (this.#opnels.scopingTns(scopeTn_a_, "button")) {
@@ -1234,7 +1235,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       }
       this.#reconstructAfelA();
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.clozTag(...p_a_, "button", "pre", "select")) {
       const tn_ = (tk_x.lexdInfo as Tag_LI).tagname_s;
@@ -1372,7 +1373,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     } else if (tk_x.openTag("object")) {
       this.#reconstructAfelA();
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
 
       this.#afels.apdMrk();
@@ -1396,7 +1397,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         this.#opnels.clozTn({ tn: "p", allTns: autoClozTn_1_a_, errTk: tk_x });
       }
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
 
       this.#insmod = Insmod.in_table;
@@ -1409,7 +1410,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         });
       }
       this.#reconstructAfelA();
-      this.#insEl(createEl(this.#insmod, tk_x), this.#tip);
+      this.#insEl(this.#createEl(tk_x), this.#tip);
     } else if (tk_x.openTag("input")) {
       if (this.#opnels.scopingTns(scopeTn_a_, "select")) {
         this.setErr(tip_0, {
@@ -1419,9 +1420,9 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         this.#opnels.clozTo_inclu("select");
       }
       this.#reconstructAfelA();
-      this.#insEl(createEl(this.#insmod, tk_x), this.#tip);
+      this.#insEl(this.#createEl(tk_x), this.#tip);
     } else if (tk_x.openTag("source", "track")) {
-      this.#insEl(createEl(this.#insmod, tk_x), tip_0);
+      this.#insEl(this.#createEl(tk_x), tip_0);
     } else if (tk_x.openTag("hr")) {
       if (this.#opnels.scopingTns(buttonScopeTn_a_, "p")) {
         this.#opnels.clozTn({ tn: "p", allTns: autoClozTn_a_, errTk: tk_x });
@@ -1435,24 +1436,24 @@ export class HTMLPazr extends Pazr<HTMLTok> {
           this.setErr(tip_0, { msg: ErrMsg.html_XXX });
         }
       }
-      this.#insEl(createEl(this.#insmod, tk_x), this.#tip);
+      this.#insEl(this.#createEl(tk_x), this.#tip);
     } else if (tk_x.openTag("image")) {
       this.setErr(tip_0, {
         msg: ErrMsg.html_unexp_opntag_as,
         rv: Ranval.fromRan(tk_x.ran_$),
       });
       this.#reconstructAfelA();
-      this.#insEl(createEl(this.#insmod, tk_x), this.#tip);
+      this.#insEl(this.#createEl(tk_x), this.#tip);
     } else if (tk_x.openTag("textarea")) {
       this.#intoText(
         State.RCDATA,
-        createEl(this.#insmod, tk_x) as Textarea_El,
+        this.#createEl(tk_x) as Textarea_El,
         tip_0,
       );
     } else if (tk_x.openTag("iframe")) {
       this.#intoText(
         State.RAWTEXT,
-        createEl(this.#insmod, tk_x) as Iframe_El,
+        this.#createEl(tk_x) as Iframe_El,
         tip_0,
       );
     } else if (tk_x.openTag("select")) {
@@ -1465,7 +1466,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       } else {
         this.#reconstructAfelA();
         this.#opnels.push(
-          this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+          this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
         );
       }
     } else if (tk_x.openTag("option")) {
@@ -1479,7 +1480,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       }
       this.#reconstructAfelA();
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag("optgroup")) {
       if (this.#opnels.scopingTns(scopeTn_a_, "select")) {
@@ -1495,7 +1496,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       }
       this.#reconstructAfelA();
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag("rp", "rt")) {
       if (this.#opnels.scopingTns(scopeTn_a_, "ruby")) {
@@ -1508,13 +1509,13 @@ export class HTMLPazr extends Pazr<HTMLTok> {
         }
       }
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
     } else if (tk_x.openTag("math")) {
       this.#reconstructAfelA();
       (tk_x.lexdInfo as Tag_LI).ns_$ = TagNS.MathML;
       (tk_x.lexdInfo as Tag_LI).attrs.adjForeignAns();
-      const el_ = createEl(this.#insmod, tk_x);
+      const el_ = this.#createEl(tk_x);
       this.#insEl(el_, this.#tip);
       if (!(tk_x.lexdInfo as Tag_LI).selfCloz_$) {
         this.#opnels.push(el_ as CtnrEl);
@@ -1523,7 +1524,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       this.#reconstructAfelA();
       (tk_x.lexdInfo as Tag_LI).ns_$ = TagNS.SVG;
       (tk_x.lexdInfo as Tag_LI).attrs.adjForeignAns();
-      const el_ = createEl(this.#insmod, tk_x);
+      const el_ = this.#createEl(tk_x);
       this.#insEl(el_, this.#tip);
       if (!(tk_x.lexdInfo as Tag_LI).selfCloz_$) {
         this.#opnels.push(el_ as CtnrEl);
@@ -1538,7 +1539,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       });
     } else if (tk_x.isOpntag) {
       this.#reconstructAfelA();
-      const el_ = createEl(this.#insmod, tk_x);
+      const el_ = this.#createEl(tk_x);
       /*#static*/ if (INOUT) {
         assert(el_.nestCat === NestCat.ordinary || el_.tagname === "noscript");
       }
@@ -1636,14 +1637,14 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       this.#afels.apdMrk();
 
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
 
       this.#insmod = Insmod.in_caption;
     } else if (tk_x.openTag("colgroup")) {
       this.#opnels.clozTo_exclu("table", "template");
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
 
       this.#insmod = Insmod.in_column_group;
@@ -1664,7 +1665,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     } else if (tk_x.openTag(...thbf)) {
       this.#opnels.clozTo_exclu("table", "template");
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
 
       this.#insmod = Insmod.in_table_body;
@@ -1723,7 +1724,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
           msg: ErrMsg.html_table_unexp_hidden_input,
           rv: Ranval.fromRan(tk_x.ran_$),
         });
-        this.#insEl(createEl(this.#insmod, tk_x), tip_0);
+        this.#insEl(this.#createEl(tk_x), tip_0);
       } else {
         else_();
       }
@@ -1736,7 +1737,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
       const ptc = this.#opnels.hasTn("template");
       if (!this.#form || ptc) {
         const el_ = this.#insEl(
-          createEl(this.#insmod, tk_x) as Form_El,
+          this.#createEl(tk_x) as Form_El,
           tip_0,
         );
         if (!ptc) this.#form = el_;
@@ -1852,7 +1853,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     } else if (tk_x.openTag("html")) {
       this.#paz_in_body(tk_x);
     } else if (tk_x.openTag("col")) {
-      this.#insEl(createEl(this.#insmod, tk_x), tip_0);
+      this.#insEl(this.#createEl(tk_x), tip_0);
     } else if (tk_x.clozTag("colgroup")) {
       if (tip_0.tagname === "colgroup") {
         //jjjj TOCLEANUP
@@ -1909,7 +1910,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     if (tk_x.openTag("tr")) {
       this.#opnels.clozTo_exclu(...thbf, "template");
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
 
       this.#insmod = Insmod.in_row;
@@ -1983,7 +1984,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     if (tk_x.openTag("th", "td")) {
       this.#opnels.clozTo_exclu("tr", "template");
       this.#opnels.push(
-        this.#insEl(createEl(this.#insmod, tk_x) as CtnrEl, this.#tip),
+        this.#insEl(this.#createEl(tk_x) as CtnrEl, this.#tip),
       );
 
       this.#afels.apdMrk();
@@ -2301,7 +2302,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     } else if (tk_x.isOpntag) {
       (tk_x.lexdInfo as Tag_LI).ns_$ = tip_0.ns;
       (tk_x.lexdInfo as Tag_LI).attrs.adjForeignAns();
-      const el_ = createEl(this.#insmod, tk_x);
+      const el_ = this.#createEl(tk_x);
       this.#insEl(el_, tip_0);
       if ((tk_x.lexdInfo as Tag_LI).selfCloz_$) {
         if (el_.tagname === "svg script") script_();
@@ -2445,7 +2446,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
           this.cleanup_$(curLoc_x);
           this.#insmod = insmod_save;
         } else {
-          const sn_ = this.#opnels.hasOnlyTns(autoClozTn_3_a_);
+          const sn_ = this.#opnels.frstNotIn(autoClozTn_3_a_);
           if (sn_) {
             sn_.setErr({
               msg: sn_.tagname === "select"
@@ -2489,7 +2490,7 @@ export class HTMLPazr extends Pazr<HTMLTok> {
           this.cleanup_$(curLoc_x);
           this.#insmod = insmod_save;
         } else {
-          const sn_ = this.#opnels.hasOnlyTns(autoClozTn_3_a_);
+          const sn_ = this.#opnels.frstNotIn(autoClozTn_3_a_);
           if (sn_) {
             sn_.setErr({
               msg: ErrMsg.html_table_eof,
@@ -2528,6 +2529,11 @@ export class HTMLPazr extends Pazr<HTMLTok> {
     }
   }
   /*49|||||||||||||||||||||||||||||||||||||||||||*/
+
+  /** @headconst @param tk_x */
+  #createEl(tk_x: HTMLTk): Elment {
+    return createEl(this.#insmod, tk_x, this.unrelSn_ss_$, this.reusdSn_ss_$);
+  }
 
   /** "adjusted insertion location" */
   #iIns: int | undefined;

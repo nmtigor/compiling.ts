@@ -9,16 +9,17 @@ import { assert } from "@fe-lib/util.ts";
 import { INOUT } from "@fe-src/preNs.ts";
 import type { Loc } from "../../Loc.ts";
 import { Ranval } from "../../Ranval.ts";
-import type { SortedSn_id } from "../../util.ts";
+import type { SortedSn_id, SortedTk_id } from "../../util.ts";
 import { ErrMsg } from "../../util.ts";
 import { Insmod } from "../alias.ts";
 import { HTMLTk } from "../HTMLTk.ts";
-import type { Doctype_LI, SortedHTMLSnt_id } from "../util.ts";
+import type { Doctype_LI } from "../util.ts";
 import { Elment } from "./Elment.ts";
-import { HTMLCtnr } from "./HTMLCtnr.ts";
+import type { HTMLCtnr } from "./HTMLCtnr.ts";
+import { HTMLCtnrIgnrdKeys, HTMLCtnrImpl } from "./HTMLCtnr.ts";
 import { HTMLSn } from "./HTMLSn.ts";
 import type { Proins } from "./Proins.ts";
-import { _toHTML_, gathrUnrelSub } from "./util.ts";
+import { _toHTML_ } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
 
 /** @final */
@@ -69,7 +70,7 @@ export class Doment extends HTMLSn {
 
   constructor() {
     super(Insmod.initial);
-    this.ctnr_$ = new HTMLCtnr(this);
+    this.ctnr_$ = new HTMLCtnrImpl(this);
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
@@ -77,16 +78,11 @@ export class Doment extends HTMLSn {
   gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedHTMLSnt_id,
+    unrelTk_ss_x: SortedTk_id,
     unrelSn_ss_x: SortedSn_id,
   ): uint {
-    return gathrUnrelSub(
-      this,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-      unrelSn_ss_x,
-    );
+    return this.ctnr_$
+      .gathrUnrelSub(drtStrtLoc_x, drtStopLoc_x, unrelTk_ss_x, unrelSn_ss_x);
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
@@ -99,7 +95,7 @@ export interface Doment extends HTMLSn, HTMLCtnr {}
 composite({
   tgtClass: Doment,
   tgtField: "ctnr_$",
-  srcClass: HTMLCtnr,
-  ignrdKey: HTMLCtnr.impledMethod_a,
+  srcClass: HTMLCtnrImpl,
+  ignrdKey: ["children", "frstToken_1", "lastToken_1", ...HTMLCtnrIgnrdKeys],
 });
 /*80--------------------------------------------------------------------------*/

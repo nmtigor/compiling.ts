@@ -21,7 +21,8 @@ import { _sortErrs_ } from "./util.ts";
 
 const bufr = new Bufr();
 const lexr = HTMLLexr.create(bufr);
-Object.assign(test_o, { bufr, lexr } as Partial<TestO>);
+const pazr = lexr.pazr_$;
+Object.assign(test_o, { bufr, lexr, pazr } as Partial<TestO>);
 
 /**
  * @const @param text_x
@@ -80,9 +81,9 @@ describe("Tree-construction", () => {
     it(t_x.data.join("\\n"), () => {
       // console.log(t_x);
       init_(t_x.data.join("\n"));
-      assertEquals(reprSnErrs_(lexr.pazr_$._err_), t_x.sn_errors);
+      assertEquals(reprSnErrs_(pazr._err_), t_x.sn_errors);
       assertEquals(reprTkErrs_(lexr._err_), t_x.tk_errors ?? []);
-      assertEquals(lexr.pazr_$._root_?._toHTML_(), t_x.document);
+      assertEquals(pazr._root_?._toHTML_(), t_x.document);
     });
   };
 

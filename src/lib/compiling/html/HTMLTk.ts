@@ -127,7 +127,7 @@ export class HTMLTk extends Token<HTMLTok> {
   //       this.htmlSn_$ instanceof CtnrEl || this.htmlSn_$ instanceof Doment,
   //     );
   //   }
-  //   (this.htmlSn_$ as HTMLCtnr).rmvSnt(this);
+  //   (this.htmlSn_$ as HTMLCtnrImpl).rmvSnt(this);
 
   //   return super.removeSelf(pn_x) as HTMLTk | undefined;
   // }

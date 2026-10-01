@@ -5,11 +5,10 @@
 
 import type { uint } from "@fe-lib/alias.ts";
 import type { Loc } from "../../Loc.ts";
-import type { SortedSn_id } from "../../util.ts";
+import type { SortedSn_id, SortedTk_id } from "../../util.ts";
 import type { Insmod } from "../alias.ts";
 import { TextCat } from "../alias.ts";
 import type { HTMLTk } from "../HTMLTk.ts";
-import type { SortedHTMLSnt_id } from "../util.ts";
 import { Elment } from "./Elment.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -44,15 +43,19 @@ export abstract class VoidEl extends Elment {
   gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedHTMLSnt_id,
+    unrelTk_ss_x: SortedTk_id,
     unrelSn_ss_x: SortedSn_id,
   ): uint {
-    if (unrelSn_ss_x.includes(this)) return 0;
+    if (unrelSn_ss_x.includes(this)) {
+      return this.gathrAllTks(unrelTk_ss_x);
+    }
 
-    let ret = this.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
-    if (ret) return ret;
+    let ret = this.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSn_ss_x);
+    if (ret) {
+      return ret += this.gathrAllTks(unrelTk_ss_x);
+    }
 
-    ret += this.opntagTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+    ret += this.opntagTk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelTk_ss_x);
     return ret;
   }
 }

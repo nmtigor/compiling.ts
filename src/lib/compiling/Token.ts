@@ -49,6 +49,9 @@ import type { _OldInfo_, LexdInfo, SortedSnt_id } from "./util.ts";
  * @using
  */
 export class Token<T extends Tok = BaseTok> extends Snt {
+  /** estimated maximal Tokens on a Line */
+  static readonly VALVE = 1_000;
+
   readonly lexr_$: Lexr<T>;
 
   // #isFrstOn(ln_x: TokLine<T>) {
@@ -660,12 +663,11 @@ export class Token<T extends Tok = BaseTok> extends Snt {
     retLn.delFrstTokenBy_$(this.lexr_$);
 
     let tk_: Token<T> = this;
-    const VALVE = 1_000;
-    let valve = VALVE;
+    let valve = Token.VALVE;
     while (tk_.prevToken_$?.sntFrstLine === retLn && --valve) {
       tk_ = tk_.prevToken_$;
     }
-    assert(valve, `Loop ${VALVE}(±1) times!`);
+    assert(valve, `Loop ${Token.VALVE}(±1) times!`);
     if (
       !tk_.isErr ||
       this.#value === BaseTok.strtBdry ||
@@ -679,12 +681,11 @@ export class Token<T extends Tok = BaseTok> extends Snt {
     retLn.delLastTokenBy_$(this.lexr_$);
 
     let tk_: Token<T> = this;
-    const VALVE = 1_000;
-    let valve = VALVE;
+    let valve = Token.VALVE;
     while (tk_.nextToken_$?.sntLastLine === retLn && --valve) {
       tk_ = tk_.nextToken_$;
     }
-    assert(valve, `Loop ${VALVE}(±1) times!`);
+    assert(valve, `Loop ${Token.VALVE}(±1) times!`);
     if (
       !tk_.isErr ||
       this.#value === BaseTok.strtBdry ||

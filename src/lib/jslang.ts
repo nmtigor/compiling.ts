@@ -943,13 +943,17 @@ export const mix = <C extends Constructor | AbstractConstructor>(
   abstract class Mix extends Base_x {}
   // console.log( Mix );
 
-  function copyProperties(source: object, target: object) {
-    // console.log( target );
-    // console.log( source );
-    for (const key of Reflect.ownKeys(source)) {
+  /**
+   * @const @param src_y
+   * @headconst @param tgt_y
+   */
+  function copyProperties(src_y: object, tgt_y: object) {
+    // console.log( tgt_y );
+    // console.log( src_y );
+    for (const key of Reflect.ownKeys(src_y)) {
       // console.log( key );
-      if (key in target) {
-        // console.log( `${key} in ${target}` );
+      if (key in tgt_y) {
+        // console.log( `${key} in ${tgt_y}` );
         continue;
       }
 
@@ -958,16 +962,20 @@ export const mix = <C extends Constructor | AbstractConstructor>(
         key !== "prototype" &&
         key !== "name"
       ) {
-        const desc = Reflect.getOwnPropertyDescriptor(source, key);
-        if (desc) Reflect.defineProperty(target, key, desc);
+        const desc = Reflect.getOwnPropertyDescriptor(src_y, key);
+        if (desc) Reflect.defineProperty(tgt_y, key, desc);
       }
     }
   }
 
-  function deepcopyProperties(source: object, target: object) {
-    let o_: object | null = source;
+  /**
+   * @const @param src_y
+   * @headconst @param tgt_y
+   */
+  function deepcopyProperties(src_y: object, tgt_y: object) {
+    let o_: object | null = src_y;
     while (o_) {
-      copyProperties(o_, target);
+      copyProperties(o_, tgt_y);
       o_ = Reflect.getPrototypeOf(o_);
     }
   }
@@ -980,7 +988,7 @@ export const mix = <C extends Constructor | AbstractConstructor>(
   return Mix;
 };
 
-type MergeP_<S, T> = {
+type CompositeP_<T, S> = {
   tgtClass: Constructor<T> | AbstractConstructor<T>;
   tgtField: keyof T;
   srcClass: Constructor<S> | AbstractConstructor<S>;
@@ -993,8 +1001,8 @@ type MergeP_<S, T> = {
  * @const @param srcClass
  * @const @param ignrdKey
  */
-export const composite = <S, T>(
-  { tgtClass, tgtField, srcClass, ignrdKey }: MergeP_<S, T>,
+export const composite = <T, S>(
+  { tgtClass, tgtField, srcClass, ignrdKey }: CompositeP_<T, S>,
 ) => {
   for (const key of Reflect.ownKeys(srcClass.prototype)) {
     if (key === "constructor" || ignrdKey?.includes(key)) continue;

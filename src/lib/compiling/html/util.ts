@@ -676,5 +676,6 @@ export const _sortErrs_ = (ers_x: ErrRepr[]): ErrRepr[] =>
   });
 /*80--------------------------------------------------------------------------*/
 
-export class SortedHTMLSnt_id extends SortedSnt_id<HTMLSn | HTMLTk> {}
+//jjjj TOCLEANUP
+// export class SortedHTMLSnt_id extends SortedSnt_id<HTMLSn | HTMLTk> {}
 /*80--------------------------------------------------------------------------*/

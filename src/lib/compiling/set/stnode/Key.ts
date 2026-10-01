@@ -55,7 +55,7 @@ export class Key extends SetSn {
     return this.lastTk$ ??= this.children.at(-1)!.lastToken_1;
   }
 
-  readonly cpl_hl_name = `${this.class_id}_cpl`;
+  readonly cpl_hln = `${this.class_id}_cpl`;
   get #cpl_hl(): Highlight {
     this.hl_a$ ??= [];
     return this.hl_a$[0] ??= new Highlight();
@@ -77,12 +77,12 @@ export class Key extends SetSn {
     for (const sn of sns_x) sn.attachTo_$(this);
 
     /*#static*/ if (!DENO) {
-      CSS.highlights.set(this.cpl_hl_name, this.#cpl_hl);
+      CSS.highlights.set(this.cpl_hln, this.#cpl_hl);
 
       document.body.style.setProperty(this.#cplTd_pn, this.#cplTd_p.cssc);
 
       document[$CSS].insertRule(
-        `::highlight(${this.cpl_hl_name}) {
+        `::highlight(${this.cpl_hln}) {
           text-decoration: var(${this.#cplTd_pn}) underline ${Tdt}em;
           text-underline-offset: var(${this.#cplTuo_pn});
         }`,
@@ -104,13 +104,13 @@ export class Key extends SetSn {
 
     /*#static*/ if (!DENO) {
       document[$CSS].deleteSelector(
-        `::highlight(${this.cpl_hl_name})`,
+        `::highlight(${this.cpl_hln})`,
       );
 
       document.body.style.removeProperty(this.#cplTd_pn);
       document.body.style.removeProperty(this.#cplTuo_pn);
 
-      CSS.highlights.delete(this.cpl_hl_name);
+      CSS.highlights.delete(this.cpl_hln);
     }
 
     super.destructor();
@@ -143,23 +143,23 @@ export class Key extends SetSn {
   }
 
   protected override setHighlight_impl$(
+    eranr_x: ERanr,
     frstLidx_x: lnum_t,
     lastLidx_x: lnum_t,
-    eranr_x: ERanr,
   ): boolean {
     this.#clr_cpl_hl();
-    let highlighted = false;
+    let highlighted = false, hld;
 
-    if (this.sntLastLidx_1 < frstLidx_x || lastLidx_x < this.sntFrstLidx_1) {
-      this.revERan();
-    } else {
+    hld = this
+      .setHl_$(this.#cpl_hl, eranr_x, frstLidx_x, lastLidx_x);
+    if (hld) {
       document.body.style.setProperty(
         this.#cplTuo_pn,
         `-${Math.max(1 + Tuof - this.depth_1 * Tuof, 0)}em`,
       );
-      this.#cpl_hl.add(this.syncERan(eranr_x).syncRange());
-      highlighted = true;
     }
+    highlighted ||= hld;
+
     return highlighted;
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/

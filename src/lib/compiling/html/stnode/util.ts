@@ -3,54 +3,16 @@
  * @license MIT
  ******************************************************************************/
 
-import type { uint } from "@fe-lib/alias.ts";
 import { fail, space } from "@fe-lib/util.ts";
 import { DEBUG } from "@fe-src/preNs.ts";
-import type { Loc } from "../../Loc.ts";
-import { Token } from "../../Token.ts";
-import type { SortedSn_id } from "../../util.ts";
 import { HTMLTk } from "../HTMLTk.ts";
 import { HTMLTok } from "../HTMLTok.ts";
-import type {
-  Chr_LI,
-  Comment_LI,
-  Doctype_LI,
-  SortedHTMLSnt_id,
-} from "../util.ts";
+import type { Chr_LI, Comment_LI, Doctype_LI } from "../util.ts";
 import { CtnrEl } from "./CtnrEl.ts";
 import { Doment } from "./Doment.ts";
 import { Elment } from "./Elment.ts";
-import type { HTMLCtnr } from "./HTMLCtnr.ts";
 import type { HTMLSn } from "./HTMLSn.ts";
 /*80--------------------------------------------------------------------------*/
-
-/**
- * @primaryconst @param self_x
- * @borrow @primaryconst @param drtStrtLoc_x
- * @borrow @primaryconst @param drtStopLoc_x
- * @out @param unrelSnt_ss_x
- * @borrow @primaryconst @param unrelSn_ss_x
- * @return count of what're gathered
- */
-export const gathrUnrelSub = (
-  self_x: HTMLCtnr,
-  drtStrtLoc_x: Loc,
-  drtStopLoc_x: Loc,
-  unrelSnt_ss_x: SortedHTMLSnt_id,
-  unrelSn_ss_x: SortedSn_id,
-): uint => {
-  let ret = 0;
-  for (const snt of self_x.snt_a) {
-    if (snt instanceof Token) {
-      ret += snt.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
-    } else if (!unrelSn_ss_x.includes(snt)) {
-      ret += snt
-        .gathrUnrelSnt(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x, unrelSn_ss_x);
-    }
-  }
-  return ret;
-};
-/*64----------------------------------------------------------*/
 
 /**
  * @headconst @param self_x

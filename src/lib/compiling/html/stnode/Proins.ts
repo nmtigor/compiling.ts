@@ -6,10 +6,10 @@
 import type { uint } from "@fe-lib/alias.ts";
 import { space } from "@fe-lib/util.ts";
 import type { Loc } from "../../Loc.ts";
-import type { SortedSn_id } from "../../util.ts";
+import type { SortedSn_id, SortedTk_id } from "../../util.ts";
 import type { Insmod } from "../alias.ts";
 import type { HTMLTk } from "../HTMLTk.ts";
-import type { Proins_LI, SortedHTMLSnt_id } from "../util.ts";
+import type { Proins_LI } from "../util.ts";
 import { HTMLSn } from "./HTMLSn.ts";
 /*80--------------------------------------------------------------------------*/
 
@@ -48,15 +48,19 @@ export class Proins extends HTMLSn {
   gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedHTMLSnt_id,
+    unrelTk_ss_x: SortedTk_id,
     unrelSn_ss_x: SortedSn_id,
   ): uint {
-    if (unrelSn_ss_x.includes(this)) return 0;
+    if (unrelSn_ss_x.includes(this)) {
+      return this.gathrAllTks(unrelTk_ss_x);
+    }
 
-    let ret = this.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
-    if (ret) return ret;
+    let ret = this.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSn_ss_x);
+    if (ret) {
+      return ret += this.gathrAllTks(unrelTk_ss_x);
+    }
 
-    ret += this.tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
+    ret += this.tk.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelTk_ss_x);
     return ret;
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/

@@ -5,7 +5,7 @@
 
 import type { Ranval } from "@fe-cpl/Ranval.ts";
 import { INOUT } from "../../preNs.ts";
-import type { loff_t, uint } from "../alias.ts";
+import { type loff_t, LOG_cssc, type uint } from "../alias.ts";
 import type { Id_t } from "../alias_v.ts";
 import { $ovlap } from "../symbols.ts";
 import { assert } from "../util.ts";

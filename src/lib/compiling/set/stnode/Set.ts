@@ -131,7 +131,7 @@ export class Set extends SetSn {
     return this.lastTk$ = retTk;
   }
 
-  readonly stx_hl_name = `${this.class_id}_stx`;
+  readonly stx_hln = `${this.class_id}_stx`;
   get #stx_hl(): Highlight {
     this.hl_a$ ??= [];
     return this.hl_a$[0] ??= new Highlight();
@@ -140,7 +140,7 @@ export class Set extends SetSn {
     this.hl_a$?.at(0)?.clear();
   }
 
-  readonly err_hl_name = `${this.class_id}_err`;
+  readonly err_hln = `${this.class_id}_err`;
   get #err_hl(): Highlight {
     this.hl_a$ ??= [];
     return this.hl_a$[1] ??= new Highlight();
@@ -177,23 +177,23 @@ export class Set extends SetSn {
     }
 
     /*#static*/ if (!DENO) {
-      CSS.highlights.set(this.stx_hl_name, this.#stx_hl);
-      CSS.highlights.set(this.err_hl_name, this.#err_hl);
+      CSS.highlights.set(this.stx_hln, this.#stx_hl);
+      CSS.highlights.set(this.err_hln, this.#err_hl);
 
       document.body.style.setProperty(this.#stxFg_pn, this.#stxFg_p.cssc);
       document.body.style.setProperty(this.#errTd_pn, this.#errTd_p.cssc);
 
       document[$CSS].insertRule(
-        `::highlight(${this.stx_hl_name}) {
+        `::highlight(${this.stx_hln}) {
           color: var(${this.#stxFg_pn});
         }`,
       );
       document[$CSS].insertRule(
         //jjjj TOCLEANUP
-        // `::highlight(${this.err_hl_name}) {
+        // `::highlight(${this.err_hln}) {
         //   text-shadow: 0 -.2em var(${this.#errTd_pn});
         // }`,
-        `::highlight(${this.err_hl_name}) {
+        `::highlight(${this.err_hln}) {
           text-decoration: var(${this.#errTd_pn}) wavy underline;
           text-underline-offset: .2em;
         }`,
@@ -214,14 +214,14 @@ export class Set extends SetSn {
 
     /*#static*/ if (!DENO) {
       const css_ = document[$CSS];
-      css_.deleteSelector(`::highlight(${this.stx_hl_name})`);
-      css_.deleteSelector(`::highlight(${this.err_hl_name})`);
+      css_.deleteSelector(`::highlight(${this.stx_hln})`);
+      css_.deleteSelector(`::highlight(${this.err_hln})`);
 
       document.body.style.removeProperty(this.#stxFg_pn);
       document.body.style.removeProperty(this.#errTd_pn);
 
-      CSS.highlights.delete(this.stx_hl_name);
-      CSS.highlights.delete(this.err_hl_name);
+      CSS.highlights.delete(this.stx_hln);
+      CSS.highlights.delete(this.err_hln);
     }
 
     super.destructor();
@@ -256,9 +256,9 @@ export class Set extends SetSn {
   }
 
   protected override setHighlight_impl$(
+    eranr_x: ERanr,
     frstLidx_x: lnum_t,
     lastLidx_x: lnum_t,
-    eranr_x: ERanr,
   ): boolean {
     if (
       this.sntLastLidx_1 < frstLidx_x || lastLidx_x < this.sntFrstLidx_1 ||
@@ -269,20 +269,7 @@ export class Set extends SetSn {
 
     this.#clr_stx_hl();
     this.#clr_err_hl();
-    let highlighted = false;
-
-    /**
-     * @headconst @param tk_y
-     * @headconst @param hl_y `#stx_hl` or `#err_hl`
-     */
-    const setHl_ = (tk_y: SetTk, hl_y: Highlight) => {
-      if (tk_y.sntLastLidx_1 < frstLidx_x || lastLidx_x < tk_y.sntFrstLidx_1) {
-        tk_y.revERan();
-      } else {
-        hl_y.add(tk_y.syncERan(eranr_x).syncRange());
-        highlighted = true;
-      }
-    };
+    let highlighted = false, hld;
 
     const unparenFrstTk = this.#unparenSet instanceof Token
       ? this.#unparenSet
@@ -295,19 +282,27 @@ export class Set extends SetSn {
         let tk_ = this.frstToken_1;
         tk_ !== unparenFrstTk;
         tk_ = tk_.nextToken_$!
-      ) setHl_(tk_, this.#stx_hl);
+      ) {
+        hld = tk_.setHl_$(this.#stx_hl, eranr_x, frstLidx_x, lastLidx_x);
+        highlighted ||= hld;
+      }
       for (
         let tk_ = this.lastToken_1;
         tk_ !== unparenLastTk;
         tk_ = tk_.prevToken_$!
-      ) setHl_(tk_, this.#stx_hl);
+      ) {
+        hld = tk_.setHl_$(this.#stx_hl, eranr_x, frstLidx_x, lastLidx_x);
+        highlighted ||= hld;
+      }
     }
 
     if (this.hasErrMsg(ErrMsg.set_unexp_tk)) {
       /*#static*/ if (INOUT) {
         assert(this.unparenSet instanceof Token);
       }
-      setHl_(this.unparenSet as SetTk, this.#err_hl);
+      hld = (this.unparenSet as SetTk)
+        .setHl_$(this.#err_hl, eranr_x, frstLidx_x, lastLidx_x);
+      highlighted ||= hld;
     }
     if (this.hasErrMsg(ErrMsg.set_no_cloz_paren)) {
       let nCloz: Paren = 0;
@@ -325,7 +320,10 @@ export class Set extends SetSn {
         let tk_ = this.frstToken_1, i = this.#paren - nCloz;
         i--;
         tk_ = tk_.nextToken_$!
-      ) setHl_(tk_, this.#err_hl);
+      ) {
+        hld = tk_.setHl_$(this.#err_hl, eranr_x, frstLidx_x, lastLidx_x);
+        highlighted ||= hld;
+      }
     }
     if (this.hasErrMsg(ErrMsg.set_no_open_paren)) {
       let nOpen: Paren = 0;
@@ -341,8 +339,12 @@ export class Set extends SetSn {
         let tk_ = this.lastToken_1, i = this.#paren - nOpen;
         i--;
         tk_ = tk_.prevToken_$!
-      ) setHl_(tk_, this.#err_hl);
+      ) {
+        hld = tk_.setHl_$(this.#err_hl, eranr_x, frstLidx_x, lastLidx_x);
+        highlighted ||= hld;
+      }
     }
+
     return highlighted;
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/

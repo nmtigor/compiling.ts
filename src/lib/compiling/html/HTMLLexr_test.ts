@@ -12,16 +12,17 @@ import { ran, repl, rv, test_o } from "../_test.ts";
 import { Bufr } from "../Bufr.ts";
 import { g_loc_fac } from "../Loc.ts";
 import { g_ran_fac } from "../RanFac.ts";
+import { Stnode } from "../Stnode.ts";
 import type { ErrRepr, TokenRepr } from "./alias.ts";
 import { State } from "./alias.ts";
 import { HTMLLexr } from "./HTMLLexr.ts";
 import { _sortErrs_ } from "./util.ts";
-import { Stnode } from "../Stnode.ts";
 /*80--------------------------------------------------------------------------*/
 
 const bufr = new Bufr();
 const lexr = HTMLLexr.create(bufr);
-Object.assign(test_o, { bufr, lexr } as Partial<TestO>);
+const pazr = lexr.pazr_$;
+Object.assign(test_o, { bufr, lexr, pazr } as Partial<TestO>);
 Stnode.FilterDepth = 100;
 
 /**
@@ -151,9 +152,15 @@ describe("Tokenizer", () => {
 describe("Compiling in body", () => {
   it("Start p-like tag", () => {
     init_("<!DOCTYPE html><p>abc");
+    assertEquals(lexr.curLexTk_$._Repr_(), [
+      /* deno-fmt-ignore */ [
+        "strtBdry[0-0)", "doctype[0-0,0-15)", "placeholder[0-15)", "placeholder[0-15)", "placeholder[0-15)", "tag[0-15,0-18)", "character[0-18,0-21)",
+      ],
+      "stopBdry[0-21)",
+      [],
+    ]);
     assertEquals(lexr.isErr, false);
-    assertEquals(lexr.pazr_$.isErr, false);
-    assertEquals(lexr.pazr_$._root_?._toHTML_(), [
+    assertEquals(pazr._root_?._toHTML_(), [
       "| <!DOCTYPE html>",
       "| <html>",
       "|   <head>",
@@ -161,14 +168,24 @@ describe("Compiling in body", () => {
       "|     <p>",
       '|       "abc"',
     ]);
+    assertEquals(pazr.isErr, false);
 
     repl(ran(0).rv, "d");
     /*
     <!DOCTYPE html><p>abcd
     */
+    /* step info:
+    6 (doctype) -> 8 (placeholder) -> 10 (placeholder, Head_El) ->
+    12 (placeholder) -> 7 (placeholder, P_El) -> 15 (character) */
+    assertEquals(lexr.curLexTk_$._Repr_(), [
+      /* deno-fmt-ignore */ [
+        "strtBdry[0-0)", "doctype[0-0,0-15)", "placeholder[0-15)", "placeholder[0-15)", "placeholder[0-15)", "tag[0-15,0-18)", "character[0-18,0-21)", "character[0-21,0-22)",
+      ],
+      "stopBdry[0-22)",
+      [],
+    ]);
     assertEquals(lexr.isErr, false);
-    assertEquals(lexr.pazr_$.isErr, false);
-    assertEquals(lexr.pazr_$._root_?._toHTML_(), [
+    assertEquals(pazr._root_?._toHTML_(), [
       "| <!DOCTYPE html>",
       "| <html>",
       "|   <head>",
@@ -176,6 +193,20 @@ describe("Compiling in body", () => {
       "|     <p>",
       '|       "abcd"',
     ]);
+    assertEquals(pazr.isErr, false);
+    assertEquals(
+      pazr.drtSn_$?._oldInfo_.info,
+      "P_El,0 [ tag[0-15,0-18), character[0-18,0-21) ]",
+    );
+    assertEquals(pazr.reusdSn_ss_$._reprSorted_(), []);
+    assertEquals(pazr.unrelSn_ss_$._reprSorted_(), [
+      "Head_El,2 [ placeholder[0-15)0 ]",
+    ]);
+    assertEquals(lexr.reusdTk_ss_$._reprSorted_(), [
+      "tag[0-15,0-18)",
+      "character[0-18,0-21)",
+    ]);
+    assertEquals(lexr.unrelTk_ss_$._reprSorted_(), []);
   });
 });
 /*80--------------------------------------------------------------------------*/

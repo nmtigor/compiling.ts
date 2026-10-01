@@ -86,7 +86,7 @@ export abstract class BinaryOp extends SetSn {
     return this.lastTk$ ??= this.rhs$ ? this.rhs$.lastToken_1 : this.opTk;
   }
 
-  readonly stx_hl_name = `${this.class_id}_stx`;
+  readonly stx_hln = `${this.class_id}_stx`;
   get #stx_hl(): Highlight {
     this.hl_a$ ??= [];
     return this.hl_a$[0] ??= new Highlight();
@@ -95,7 +95,7 @@ export abstract class BinaryOp extends SetSn {
     this.hl_a$?.at(0)?.clear();
   }
 
-  readonly cpl_hl_name = `${this.class_id}_cpl`;
+  readonly cpl_hln = `${this.class_id}_cpl`;
   get #cpl_hl(): Highlight {
     this.hl_a$ ??= [];
     return this.hl_a$[1] ??= new Highlight();
@@ -121,19 +121,19 @@ export abstract class BinaryOp extends SetSn {
     lhs_x.attachTo_$(this);
 
     /*#static*/ if (!DENO) {
-      CSS.highlights.set(this.stx_hl_name, this.#stx_hl);
-      CSS.highlights.set(this.cpl_hl_name, this.#cpl_hl);
+      CSS.highlights.set(this.stx_hln, this.#stx_hl);
+      CSS.highlights.set(this.cpl_hln, this.#cpl_hl);
 
       document.body.style.setProperty(this.#stxFg_pn, this.#stxFg_p.cssc);
       document.body.style.setProperty(this.#cplTd_pn, this.#cplTd_p.cssc);
 
       document[$CSS].insertRule(
-        `::highlight(${this.stx_hl_name}) {
+        `::highlight(${this.stx_hln}) {
           color: var(${this.#stxFg_pn});
         }`,
       );
       document[$CSS].insertRule(
-        `::highlight(${this.cpl_hl_name}) {
+        `::highlight(${this.cpl_hln}) {
               text-decoration: var(${this.#cplTd_pn}) underline ${Tdt}em;
               text-underline-offset: var(${this.#cplTuo_pn});
             }`,
@@ -144,15 +144,15 @@ export abstract class BinaryOp extends SetSn {
   override destructor(): void {
     /*#static*/ if (!DENO) {
       const css_ = document[$CSS];
-      css_.deleteSelector(`::highlight(${this.stx_hl_name})`);
-      css_.deleteSelector(`::highlight(${this.cpl_hl_name})`);
+      css_.deleteSelector(`::highlight(${this.stx_hln})`);
+      css_.deleteSelector(`::highlight(${this.cpl_hln})`);
 
       document.body.style.removeProperty(this.#stxFg_pn);
       document.body.style.removeProperty(this.#cplTd_pn);
       document.body.style.removeProperty(this.#cplTuo_pn);
 
-      CSS.highlights.delete(this.stx_hl_name);
-      CSS.highlights.delete(this.cpl_hl_name);
+      CSS.highlights.delete(this.stx_hln);
+      CSS.highlights.delete(this.cpl_hln);
     }
 
     super.destructor();
@@ -187,9 +187,9 @@ export abstract class BinaryOp extends SetSn {
   }
 
   protected override setHighlight_impl$(
+    eranr_x: ERanr,
     frstLidx_x: lnum_t,
     lastLidx_x: lnum_t,
-    eranr_x: ERanr,
   ): boolean {
     if (this.sntLastLidx_1 < frstLidx_x || lastLidx_x < this.sntFrstLidx_1) {
       return this.clrHighlight_impl$();
@@ -197,23 +197,21 @@ export abstract class BinaryOp extends SetSn {
 
     this.#clr_stx_hl();
     this.#clr_cpl_hl();
+    let highlighted = false, hld;
 
-    if (
-      this.opTk.sntLastLidx_1 < frstLidx_x ||
-      lastLidx_x < this.opTk.sntFrstLidx_1
-    ) {
-      this.opTk.revERan();
-    } else {
-      this.#stx_hl.add(this.opTk.syncERan(eranr_x).syncRange());
+    hld = this.opTk.setHl_$(this.#stx_hl, eranr_x, frstLidx_x, lastLidx_x);
+    highlighted ||= hld;
+
+    hld = this.setHl_$(this.#cpl_hl, eranr_x, frstLidx_x, lastLidx_x);
+    if (hld) {
+      document.body.style.setProperty(
+        this.#cplTuo_pn,
+        `-${Math.max(1 + Tuof - this.depth_1 * Tuof, 0)}em`,
+      );
     }
+    highlighted ||= hld;
 
-    document.body.style.setProperty(
-      this.#cplTuo_pn,
-      `-${Math.max(1 + Tuof - this.depth_1 * Tuof, 0)}em`,
-    );
-    this.#cpl_hl.add(this.syncERan(eranr_x).syncRange());
-
-    return true;
+    return highlighted;
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
@@ -271,7 +269,7 @@ export class BinaryErr extends BinaryOp {
     this.hl_a$?.at(2)?.clear();
   }
 
-  readonly #err_hl_name = `${this.class_id}_err`;
+  readonly #err_hln = `${this.class_id}_err`;
   get #err_hl(): Highlight {
     this.hl_a$ ??= [];
     return this.hl_a$[3] ??= new Highlight();
@@ -310,20 +308,20 @@ export class BinaryErr extends BinaryOp {
     }
 
     /*#static*/ if (!DENO) {
-      CSS.highlights.set(this.stx_hl_name, this.#stx_hl);
-      CSS.highlights.set(this.#err_hl_name, this.#err_hl);
+      CSS.highlights.set(this.stx_hln, this.#stx_hl);
+      CSS.highlights.set(this.#err_hln, this.#err_hl);
 
       document.body.style.setProperty(this.#stxTd_pn, this.#stxTd_p.cssc);
       document.body.style.setProperty(this.#errTd_pn, this.#errTd_p.cssc);
 
       document[$CSS].insertRule(
-        `::highlight(${this.stx_hl_name}) {
+        `::highlight(${this.stx_hln}) {
           text-decoration: var(${this.#stxTd_pn}) wavy underline;
           text-underline-offset: .2em;
         }`,
       );
       document[$CSS].insertRule(
-        `::highlight(${this.#err_hl_name}) {
+        `::highlight(${this.#err_hln}) {
           text-decoration: var(${this.#errTd_pn}) wavy underline;
           text-underline-offset: .2em;
         }`,
@@ -354,14 +352,14 @@ export class BinaryErr extends BinaryOp {
 
     /*#static*/ if (!DENO) {
       const css_ = document[$CSS];
-      css_.deleteSelector(`::highlight(${this.stx_hl_name})`);
-      css_.deleteSelector(`::highlight(${this.#err_hl_name})`);
+      css_.deleteSelector(`::highlight(${this.stx_hln})`);
+      css_.deleteSelector(`::highlight(${this.#err_hln})`);
 
       document.body.style.removeProperty(this.#stxTd_pn);
       document.body.style.removeProperty(this.#errTd_pn);
 
-      CSS.highlights.delete(this.stx_hl_name);
-      CSS.highlights.delete(this.#err_hl_name);
+      CSS.highlights.delete(this.stx_hln);
+      CSS.highlights.delete(this.#err_hln);
     }
 
     super.destructor();
@@ -369,30 +367,24 @@ export class BinaryErr extends BinaryOp {
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
   protected override setHighlight_impl$(
+    eranr_x: ERanr,
     frstLidx_x: lnum_t,
     lastLidx_x: lnum_t,
-    eranr_x: ERanr,
   ): boolean {
-    const snHled = super.setHighlight_impl$(frstLidx_x, lastLidx_x, eranr_x);
+    if (!super.setHighlight_impl$(eranr_x, frstLidx_x, lastLidx_x)) {
+      return false;
+    }
 
     this.#clr_stx_hl();
     this.#clr_err_hl();
 
-    if (
-      !snHled ||
-      this.opTk.sntLastLidx_1 < frstLidx_x ||
-      lastLidx_x < this.opTk.sntFrstLidx_1
-    ) {
-      this.opTk.revERan();
-    } else {
-      this.#stx_hl.add(this.opTk.syncERan(eranr_x).syncRange());
+    this.opTk.setHl_$(this.#stx_hl, eranr_x, frstLidx_x, lastLidx_x);
+
+    if (this.hasErrMsg(ErrMsg.set_binaryerr_no_rhs)) {
+      this.setHl_$(this.#err_hl, eranr_x, frstLidx_x, lastLidx_x);
     }
 
-    if (snHled && this.hasErrMsg(ErrMsg.set_binaryerr_no_rhs)) {
-      this.#err_hl.add(this.range_$);
-    }
-
-    return snHled;
+    return true;
   }
 }
 /*80--------------------------------------------------------------------------*/

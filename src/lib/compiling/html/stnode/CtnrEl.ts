@@ -5,18 +5,17 @@
 
 import type { Insmod } from "@fe-cpl/html/alias.ts";
 import { TagNS } from "@fe-cpl/html/alias.ts";
-import type { SortedSn_id } from "@fe-cpl/util.ts";
+import type { SortedSn_id, SortedTk_id } from "@fe-cpl/util.ts";
 import { ErrMsg } from "@fe-cpl/util.ts";
 import type { uint } from "@fe-lib/alias.ts";
 import { composite } from "@fe-lib/jslang.ts";
 import { Loc } from "../../Loc.ts";
 import { HTMLTk } from "../HTMLTk.ts";
 import { HTMLTok } from "../HTMLTok.ts";
-import { SortedHTMLSnt_id } from "../util.ts";
 import { Elment } from "./Elment.ts";
-import { HTMLCtnr } from "./HTMLCtnr.ts";
+import type { HTMLCtnr } from "./HTMLCtnr.ts";
+import { HTMLCtnrIgnrdKeys, HTMLCtnrImpl } from "./HTMLCtnr.ts";
 import type { Proins } from "./Proins.ts";
-import { gathrUnrelSub } from "./util.ts";
 /*80--------------------------------------------------------------------------*/
 
 /** non-`TextCat.void` Elment */
@@ -44,7 +43,7 @@ export abstract class CtnrEl extends Elment {
    */
   constructor(insmod_x: Insmod, tagname_x: string, tk_x: HTMLTk) {
     super(insmod_x, tagname_x, tk_x.value === HTMLTok.tag ? tk_x : undefined);
-    this.ctnr_$ = new HTMLCtnr(this, tk_x);
+    this.ctnr_$ = new HTMLCtnrImpl(this, tk_x);
     //jjjj TOCLEANUP
     // tk_x.htmlSn_$ = this;
 
@@ -68,21 +67,20 @@ export abstract class CtnrEl extends Elment {
   gathrUnrelSnt(
     drtStrtLoc_x: Loc,
     drtStopLoc_x: Loc,
-    unrelSnt_ss_x: SortedHTMLSnt_id,
+    unrelTk_ss_x: SortedTk_id,
     unrelSn_ss_x: SortedSn_id,
   ): uint {
-    if (unrelSn_ss_x.includes(this)) return 0;
+    if (unrelSn_ss_x.includes(this)) {
+      return this.gathrAllTks(unrelTk_ss_x);
+    }
 
-    let ret = this.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSnt_ss_x);
-    if (ret) return ret;
+    let ret = this.gathrSelf(drtStrtLoc_x, drtStopLoc_x, unrelSn_ss_x);
+    if (ret) {
+      return ret += this.gathrAllTks(unrelTk_ss_x);
+    }
 
-    ret += gathrUnrelSub(
-      this,
-      drtStrtLoc_x,
-      drtStopLoc_x,
-      unrelSnt_ss_x,
-      unrelSn_ss_x,
-    );
+    ret += this.ctnr_$
+      .gathrUnrelSub(drtStrtLoc_x, drtStopLoc_x, unrelTk_ss_x, unrelSn_ss_x);
     return ret;
   }
 }
@@ -91,8 +89,8 @@ export interface CtnrEl extends Elment, HTMLCtnr {}
 composite({
   tgtClass: CtnrEl,
   tgtField: "ctnr_$",
-  srcClass: HTMLCtnr,
-  ignrdKey: HTMLCtnr.impledMethod_a,
+  srcClass: HTMLCtnrImpl,
+  ignrdKey: ["children", "frstToken_1", "lastToken_1", ...HTMLCtnrIgnrdKeys],
 });
 /*64----------------------------------------------------------*/
 

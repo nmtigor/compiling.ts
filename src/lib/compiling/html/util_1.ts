@@ -5,12 +5,13 @@
 
 import { INOUT } from "@fe-src/preNs.ts";
 import { assert } from "../../util.ts";
+import type { SortedSn_id } from "../util.ts";
 import type { Insmod } from "./alias.ts";
 import type { HTMLTk } from "./HTMLTk.ts";
 import { HTMLTok } from "./HTMLTok.ts";
 import { Colgroup_El } from "./stnode/Colgroup_El.ts";
 import { Unknown_El } from "./stnode/CtnrEl.ts";
-import type { Elment } from "./stnode/Elment.ts";
+import { Elment } from "./stnode/Elment.ts";
 import {
   A_SVG,
   Abbr_El,
@@ -214,13 +215,32 @@ import type { Tag_LI } from "./util.ts";
 /**
  * @const @param insmod_x
  * @headconst @param tk_x
+ * @headconst @param unrelSn_ss_x
+ * @headconst @param reusdSn_ss_x
  */
-export const createEl = (insmod_x: Insmod, tk_x: HTMLTk): Elment => {
+export const createEl = (
+  insmod_x: Insmod,
+  tk_x: HTMLTk,
+  unrelSn_ss_x: SortedSn_id,
+  reusdSn_ss_x: SortedSn_id,
+): Elment => {
   /*#static*/ if (INOUT) {
     /* Not always `isOpntag`, e.g. `</br>` (although it's an error). */
     assert(tk_x.value === HTMLTok.tag);
   }
-  /* deno-fmt-ignore */ switch ((tk_x.lexdInfo as Tag_LI).tagname_s) {
+  const tn_ = (tk_x.lexdInfo as Tag_LI).tagname_s;
+  for (const sn of unrelSn_ss_x) {
+    if (
+      tk_x.sntStrtLoc.posE(sn.sntStrtLoc) &&
+      sn instanceof Elment && tn_ === sn.tagname
+    ) {
+      unrelSn_ss_x.rmv(sn);
+      reusdSn_ss_x.add(sn);
+      return sn;
+    }
+  }
+
+  /* deno-fmt-ignore */ switch (tn_) {
       /* SpecialVoidEl */
       case "area": return new Area_El(insmod_x, tk_x);
       case "base": return new Base_El(insmod_x, tk_x);

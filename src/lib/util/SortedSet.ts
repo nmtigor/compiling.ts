@@ -3,19 +3,19 @@
  * @license MIT
  ******************************************************************************/
 
+import { composite } from "@fe-lib/jslang.ts";
 import { INOUT } from "../../preNs.ts";
 import type { id_t, uint } from "../alias.ts";
-import { composite } from "@fe-lib/jslang.ts";
 import { assert, fail } from "../util.ts";
 /*80--------------------------------------------------------------------------*/
 
-export type Cf<T> = (a: T, b: T) => boolean;
+export type Cf<V> = (a: V, b: V) => boolean;
 
 //kkkk SortedSet: consider using B-tree, ref. https://youtu.be/K1a2Bk8NrYQ
 /**
  * primaryconst: const exclude `#sorted`, `#tmp_a`, element order
  */
-export class SortedSet<T> {
+export class SortedSet<V> {
   static #ID = 0 as id_t;
   readonly id = ++SortedSet.#ID as id_t;
   /** @final */
@@ -24,8 +24,8 @@ export class SortedSet<T> {
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
-  #less: Cf<T>;
-  setLess(_x: Cf<T>): this {
+  #less: Cf<V>;
+  setLess(_x: Cf<V>): this {
     if (_x === this.#less) return this;
 
     this.#less = _x;
@@ -34,7 +34,7 @@ export class SortedSet<T> {
   }
 
   /* ary */
-  readonly ary: T[];
+  readonly ary: V[];
 
   get length() {
     return this.ary.length;
@@ -44,15 +44,16 @@ export class SortedSet<T> {
     this.ary.length = _x;
   }
 
-  get empty(): boolean {
-    return !this.ary.length;
-  }
+  //jjjj TOCLEANUP
+  // get empty(): boolean {
+  //   return !this.ary.length;
+  // }
   /* ~ */
 
   /** Without `#eq`, equality is `!#less(a,b) && !#less(b,a)` */
-  #eq: Cf<T> | undefined;
+  #eq: Cf<V> | undefined;
 
-  #tmp_a: (T | undefined)[] | undefined;
+  #tmp_a: (V | undefined)[] | undefined;
   protected get tmp_a$() {
     this.#tmp_a ??= [];
     return this.#tmp_a;
@@ -84,7 +85,7 @@ export class SortedSet<T> {
    * @move @const @param vals_x Not handled yet. May be `resort()`ed later.
    * @const @param eq_x
    */
-  constructor(less_x: Cf<T>, vals_x?: T[], eq_x?: Cf<T>) {
+  constructor(less_x: Cf<V>, vals_x?: V[], eq_x?: Cf<V>) {
     this.#less = less_x;
     this.ary = vals_x ?? [];
     this.#sorted = this.ary.length ? false : true;
@@ -104,7 +105,7 @@ export class SortedSet<T> {
    * If `#sorted`, set `#index`
    * @headconst @param val_x
    */
-  includes(val_x: T): boolean {
+  includes(val_x: V): boolean {
     return this.#sorted
       ? this.#find_j(val_x, 0, this.ary.length)
       : this.ary.includes(val_x);
@@ -114,13 +115,13 @@ export class SortedSet<T> {
    * If `#sorted`, set `#index`
    * @headconst @param val_x
    */
-  indexOf(val_x: T): uint | -1 {
+  indexOf(val_x: V): uint | -1 {
     return this.#sorted
       ? this.includes(val_x) ? this.#index : -1
       : this.ary.indexOf(val_x);
   }
 
-  sort(): T[] {
+  sort(): V[] {
     fail("Disabled");
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
@@ -137,7 +138,7 @@ export class SortedSet<T> {
    * @const @param jdx_x
    * @const @param len_x
    */
-  #find_j(val_x: T, jdx_x: uint, len_x: uint): boolean {
+  #find_j(val_x: V, jdx_x: uint, len_x: uint): boolean {
     let found = false;
     if (len_x === 1) {
       if (this.#less(this.ary[jdx_x], val_x)) {
@@ -167,11 +168,11 @@ export class SortedSet<T> {
    * Return `-1` if `empty`, `len` if no such one
    * @headconst @param val_x
    */
-  mostGE(val_x: T): uint | -1 {
+  mostGE(val_x: V): uint | -1 {
     /*#static*/ if (INOUT) {
       assert(this.#sorted, "This method is callable only in the sorted state.");
     }
-    if (this.empty) return -1;
+    if (!this.length) return -1;
 
     let ret = this.indexOf(val_x);
     if (ret < 0) {
@@ -190,7 +191,7 @@ export class SortedSet<T> {
   //  * Return `-1` if no such one
   //  * @headconst @param val_x
   //  */
-  // mostSE( val_x:T ):int
+  // mostSE( val_x:V ):int
   // {
   //   if( this.empty ) return -1
 
@@ -212,7 +213,7 @@ export class SortedSet<T> {
    * @return Return the index of the added;
    *    if already exist, return `-1`
    */
-  add(val_x: T): uint | -1 {
+  add(val_x: V): uint | -1 {
     const had = this.includes(val_x);
     if (!had) {
       this.splice(this.#index, 0, val_x);
@@ -220,7 +221,7 @@ export class SortedSet<T> {
     return had ? -1 : this.#index;
   }
   /** @headborrow @headconst @param vals_x */
-  add_O(vals_x?: T[]): this {
+  add_O(vals_x?: V[]): this {
     if (vals_x === undefined) return this;
 
     /*#static*/ if (INOUT) {
@@ -236,7 +237,7 @@ export class SortedSet<T> {
    * @return Return the index of the removed;
    *    if not exist, return `-1`
    */
-  rmv(val_x: T): uint | -1 {
+  rmv(val_x: V): uint | -1 {
     const has = this.includes(val_x);
     if (has) {
       this.splice(this.#index, 1);
@@ -244,7 +245,7 @@ export class SortedSet<T> {
     return has ? this.#index : -1;
   }
   /** @headborrow @headconst @param vals_x */
-  rmv_O(vals_x?: T[]): void {
+  rmv_O(vals_x?: V[]): void {
     if (vals_x === undefined) return;
 
     /*#static*/ if (INOUT) {
@@ -365,12 +366,12 @@ export class SortedSet<T> {
   //   return `[ ${str_a.join(", ")} ]`;
   // }
 
-  toJSON(): T[] {
+  toJSON(): V[] {
     return this.ary;
   }
 }
 
-export interface SortedSet<T> extends Omit<Array<T>, number> {}
+export interface SortedSet<V> extends Omit<Array<V>, number> {}
 composite({
   tgtClass: SortedSet,
   tgtField: "ary",
@@ -379,12 +380,12 @@ composite({
 });
 /*64----------------------------------------------------------*/
 
-export class SortedIdo<T extends { id: id_t } = { id: id_t }>
-  extends SortedSet<T> {
+export class SortedIdo<V extends { id: id_t } = { id: id_t }>
+  extends SortedSet<V> {
   protected static less_id$: Cf<{ id: id_t }> = (a, b) => a.id < b.id;
 
   /** @move @const @param vals_x */
-  constructor(vals_x?: T[]) {
+  constructor(vals_x?: V[]) {
     super(SortedIdo.less_id$, vals_x);
   }
 }

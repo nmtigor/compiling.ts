@@ -140,6 +140,32 @@ export abstract class Snt {
   }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
+  /**
+   * Add the `Range` of `this` to `hl_x` if `this` intersects
+   * `[ frstLidx_x, lastLidx_x ]`,
+   * @final
+   * @headconst @param hl_x
+   * @headconst @param eranr_x
+   * @const @param frstLidx_x
+   * @const @param lastLidx_x
+   * @return highlighted or not
+   */
+  setHl_$(
+    hl_x: Highlight,
+    eranr_x: ERanr,
+    frstLidx_x: lnum_t,
+    lastLidx_x: lnum_t,
+  ): boolean {
+    if (this.sntLastLidx_1 < frstLidx_x || lastLidx_x < this.sntFrstLidx_1) {
+      this.revERan();
+      return false;
+    }
+
+    hl_x.add(this.syncERan(eranr_x).syncRange());
+    return true;
+  }
+  /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
   /** For testing only */
   toString() {
     return this.class_id;

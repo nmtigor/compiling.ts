@@ -231,7 +231,7 @@ export class Caret extends HTMLVuu<EdtrBase, HTMLInputElement> {
   // readonly #selec_fac: SelecFac;
 
   readonly #selec_hl = new Highlight();
-  readonly #selec_hl_name = `${this.class_id}_selec`;
+  readonly #selec_hln = `${this.class_id}_selec`;
   #hideSelec() {
     //jjjj TOCLEANUP
     // this.#selec_fac.reset_Factory();
@@ -337,9 +337,9 @@ export class Caret extends HTMLVuu<EdtrBase, HTMLInputElement> {
       backgroundColor: this.#bgCssc,
     });
 
-    CSS.highlights.set(this.#selec_hl_name, this.#selec_hl);
+    CSS.highlights.set(this.#selec_hln, this.#selec_hl);
     document[$CSS].insertRule(
-      `::highlight(${this.#selec_hl_name}) {
+      `::highlight(${this.#selec_hln}) {
         background-color: var(${this.#selecBg_pn});
       }`,
     );
@@ -372,9 +372,9 @@ export class Caret extends HTMLVuu<EdtrBase, HTMLInputElement> {
   //   this.unobserveTheme();
 
   //   document[$CSS].deleteSelector(
-  //     `::highlight(${this.#selec_hl_name})`,
+  //     `::highlight(${this.#selec_hln})`,
   //   );
-  //   CSS.highlights.delete(this.#selec_hl_name);
+  //   CSS.highlights.delete(this.#selec_hln);
   // }
   /*64||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
 
